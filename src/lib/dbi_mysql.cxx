@@ -40,6 +40,8 @@
  *
  */
 
+const static char* desc="$Version$";
+
 #ifdef SQLOCO_ENABLE_MYSQL
 
 #include <sqloco/dbi.h>

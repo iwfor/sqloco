@@ -40,6 +40,8 @@
  *
  */
 
+const static char* desc="$Version$";
+
 #ifdef SQLOCO_ENABLE_POSTGRESQL
 
 #include <sqloco/dbi.h>

@@ -38,6 +38,8 @@
  *
  */
 
+const static char* desc="$Version$";
+
 #ifdef SQLOCO_ENABLE_MYSQL
 
 #include "statement_mysql.h"
