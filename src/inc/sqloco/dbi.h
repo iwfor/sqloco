@@ -79,6 +79,9 @@ public:
 	/// Prepare a query for execution.
 	statement* prepare(const char* query);
 
+	/// Prepare a query for execution.
+	statement* prepare(const std::string& query);
+
 	/// Execute a statement without reading the respone.
 	long execute(const char* statement);
 
