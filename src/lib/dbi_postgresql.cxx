@@ -85,31 +85,18 @@ bool dbi_postgresql::open(const char* username, const char* password, const char
 	close();
 	if (!hostname)
 		return true;
-	std::string connstr;
-	if (db && *db)
-	{
-		connstr+= "dbname=";
-		connstr+= db;
-	}
-	// TODO: If host is an IP address, use hostaddr= instead
-	connstr+= " host=";
-	connstr+= hostname;
+	if (!db || !*db)
+		db = "template1";
 	if (port)
 	{
-		char buf[32];
-		std::sprintf(buf, "%u", port);
-		connstr+= " port=";
-		connstr+= buf;
+		char portbuf[16];
+		std::sprintf(portbuf, "%u", port);
+		conn = PQsetdbLogin(hostname, portbuf, 0, "120", db, username, password);
 	}
-	connstr+= " user=";
-	connstr+= username;
-	connstr+= " password=";
-	connstr+= password;
-	conn = PQconnectdb(connstr.c_str());
-	if (PQstatus(conn) != CONNECTION_OK)
-	{
+	else
+		conn = PQsetdbLogin(hostname, 0, 0, "120", db, username, password);
+	if (!conn || (PQstatus(conn) != CONNECTION_OK))
 		return true;
-	}
 	return false;
 }
 

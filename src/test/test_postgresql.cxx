@@ -103,13 +103,12 @@ bool test(clo::parser& parser)
 		return true;
 	}
 
-	// Create a test database
 	if (dbh.execute("CREATE DATABASE sqloco_test") < 0)
 	{
-		std::cout << "Failed to create database: " << dbh.errstr() << std::endl;
+		std::cout << "Failed to create database sqloco_test: " << dbh.errstr() << std::endl;
 		return true;
 	}
-
+	
 	bool rval = test1(dbh);
 
 	// Clean up the database
@@ -122,13 +121,13 @@ bool test1(sqloco::dbi& dbh)
 	sqloco::statement* sth;
 	unsigned i;
 
-	// Switch to the test database
-	if (dbh.execute("USE sqloco_test") < 0)
+	// Switch to database
+	if (dbh.execute("\\c sqloco_test") < 0)
 	{
-		std::cout << "Failed to use database: " << dbh.errstr() << std::endl;
+		std::cout << "Failed to switch to database sqloco_test: " << dbh.errstr() << std::endl;
 		return true;
 	}
-
+	
 	// Create the first test table
 	if (dbh.execute(
 			"CREATE TABLE phonebook (\n"

@@ -7,10 +7,18 @@ See LICENSE file for license information.
 Run
 
 	perl configure.pl
-
-then
-
 	make
 	make install
-	make clean
+
+To run tests, you must use an account that has the create table privilege.
+Tests are not automated at this time, as each database may require different
+access.  E.g.
+
+	cd src/test
+	./test_mysql -u root -p foobar
+	./test_postgresql -u foo -p bar
+
+Notes:
+	The tests currently require the SQL servers to be listening on the default
+	TCP/IP port.  You cannot override the host or port.
 
