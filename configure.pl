@@ -136,7 +136,12 @@ if (!$clo{'without-mysql'}) {
 		$libcnt++;
 		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_MYSQL";
 		$dbs{'mysql'} = 1;
-		$libraries.= "--linkwith '$flib,mysqlclient' ";
+		if (-e "$flib/libmysqlclient_r.a") {
+			# Use thread safe library if available
+			$libraries.= "--linkwith '$flib,mysqlclient_r' ";
+		} else {
+			$libraries.= "--linkwith '$flib,mysqlclient' ";
+		}
 		if (($finc ne "system") && ($finc ne "/usr/local/include")) {
 			$includes.= "--include '$finc' ";
 		}
