@@ -105,7 +105,6 @@ bool dbi_postgresql::open(const char* username, const char* password, const char
 	connstr+= username;
 	connstr+= " password=";
 	connstr+= password;
-	connstr+= " connect_timeout=90";
 	conn = PQconnectdb(connstr.c_str());
 	if (PQstatus(conn) != CONNECTION_OK)
 	{
