@@ -93,8 +93,8 @@ const unsigned num_entries = sizeof(entries) / sizeof(entry_s);
 bool test(clo::parser& parser)
 {
 	const clo::options& options = parser.get_options();
-	::dbi dbh(sqloco::db_mysql);
-	::statement* sth;
+	sqloco::dbi dbh(sqloco::db_mysql);
+	sqloco::statement* sth;
 	unsigned i;
 
 	if (dbh.open(options.username.c_str(), options.password.c_str()))
@@ -103,12 +103,12 @@ bool test(clo::parser& parser)
 		return true;
 	}
 
-	if (dbh.execute("CREATE DATABASE _test") < 0)
+	if (dbh.execute("CREATE DATABASE sqloco_test") < 0)
 	{
 		std::cout << "Failed to create database: " << dbh.errstr() << std::endl;
 		return true;
 	}
-	if (dbh.execute("USE _test") < 0)
+	if (dbh.execute("USE sqloco_test") < 0)
 	{
 		std::cout << "Failed to use database: " << dbh.errstr() << std::endl;
 		return true;
@@ -132,7 +132,7 @@ bool test(clo::parser& parser)
 		sth->addparam(entries[i].number);
 		sth->execute();
 	}
-	sth->finish();
+	delete sth;
 	
 	sth = dbh.prepare("SELECT * FROM phonebook ORDER BY name");
 	if (sth->execute() < 0)
@@ -151,8 +151,44 @@ bool test(clo::parser& parser)
 		std::cout << "name: " << name << std::endl;
 		std::cout << "ph #: " << number << std::endl;
 	}
-	sth->finish();
-	
-	dbh.execute("DROP DATABASE _test");
+
+	// re-execute query
+	if (sth->execute() < 0)
+	{
+		std::cout << "Failed query: " << dbh.errstr() << std::endl;
+		return true;
+	}
+	sqloco::Hash hash;
+	while (!sth->fetchhash(hash))
+	{
+		sqloco::Hash::iterator it(hash.begin()), end(hash.end());
+		for (; it!=end; ++it)
+			std::cout << it->first << ": " << it->second << std::endl;
+	}
+	delete sth;
+
+	dbh.execute(
+			"CREATE TABLE misctest (\n"
+			"somefield varchar(8))"
+			);
+	dbh.execute("INSERT INTO misctest VALUES ('hello')");
+	dbh.execute("INSERT INTO misctest VALUES (null)");
+	dbh.execute("INSERT INTO misctest VALUES ('goodbye')");
+
+	sth = dbh.prepare("SELECT * FROM misctest\n");
+	sth->execute();
+	sth->bind(name);
+	while (!sth->fetch())
+	{
+		std::cout << "Word: ";
+		if (sth->isnull(0))
+			std::cout << "[NULL]";
+		else
+			std::cout << name;
+		std::cout << std::endl;
+	}
+	delete sth;
+
+	dbh.execute("DROP DATABASE sqloco_test");
 	return false;
 }

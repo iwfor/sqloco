@@ -293,7 +293,7 @@ databases dbi::gettype() const
  * @return	Pointer to version number string.
  *
  */
-const char* dbi::version() const
+const char* dbi::version()
 {
 	return sqloco_version;
 }

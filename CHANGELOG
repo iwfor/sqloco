@@ -4,6 +4,10 @@ Version 0.52
 ------------
 - Added two new forms of execute for simplified programming.
 - Number parameters are no longer wrapped in quotes.
+- Fixed bug in statement::fetch under MySQL that would cause a crash if fetch
+  is called after a failed execute.
+- Added statement::fetchhash for fetching row into a hash.
+- Added statement::isnull to check for null values after fetch.
 
 Version 0.51
 ------------

@@ -98,7 +98,7 @@ public:
 	databases gettype() const;
 
 	/// Get library version number string.
-	const char* version() const;
+	const char* version();
 
 private:
 	dbi();

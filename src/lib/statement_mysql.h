@@ -48,6 +48,7 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <map>
 
 namespace sqloco {
 
@@ -101,6 +102,9 @@ public:
 	bool bind(char*, unsigned);
 
 	bool fetch();
+	bool fetchhash(Hash& hash);
+	bool isnull(const std::string& fieldname);
+	bool isnull(unsigned fieldno);
 	long getuid();
 	
 private:
@@ -112,7 +116,9 @@ private:
 
 	// These variables are set by statement::[methods]()
 	std::queue< std::string > params;
+	std::vector< std::string > fieldnames;
 	std::vector< mysql_field_s > bindings;
+	std::map< std::string, bool > nullfields;
 	unsigned currow;
 	MYSQL_RES* cursor;
 };

@@ -45,11 +45,14 @@
 
 #include "const.h"
 #include <string>
+#include <map>
 
 namespace sqloco {
 
 // Forward Declarations
 class dbi;
+
+typedef std::map< std::string, std::string > Hash;
 
 class statement {
 public: 
@@ -70,6 +73,9 @@ public:
 	virtual bool bind(double& num) = 0;
 	virtual bool bind(char* buf, unsigned size) = 0;
 	virtual bool fetch() = 0;
+	virtual bool fetchhash(Hash& hash) = 0;
+	virtual bool isnull(const std::string& fieldname) = 0;
+	virtual bool isnull(unsigned fieldno) = 0;
 	virtual long getuid() = 0;
 };
 

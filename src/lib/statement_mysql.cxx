@@ -87,6 +87,7 @@ void statement_mysql::finish()
 	}
 	currow = 0;
 	bindings.clear();
+	fieldnames.clear();
 }
 
 
@@ -170,6 +171,11 @@ long statement_mysql::execute()
 		mysql_free_result(cursor);
 	cursor = 0;
 
+	// Clear storage
+	fieldnames.clear();
+	nullfields.clear();
+	bindings.clear();
+
 	// read through statement, replacing ? with values added with
 	// addparam() functions.
 	std::string stmt;
@@ -218,6 +224,13 @@ long statement_mysql::execute()
 	
 	if ( !(cursor = mysql_store_result(dbhi->conn)) )
 		return mysql_affected_rows(dbhi->conn);
+
+	unsigned int num_fields, i;
+	MYSQL_FIELD *fields;
+	num_fields = mysql_num_fields(cursor);
+	fields = mysql_fetch_fields(cursor);
+	for(i = 0; i < num_fields; i++)
+		fieldnames.push_back(fields[i].name);
 
 	return mysql_num_rows(cursor);
 }
@@ -302,6 +315,9 @@ bool statement_mysql::bind(char* buf, unsigned size)
 bool statement_mysql::fetch()
 {
 	MYSQL_ROW row;
+	if (!cursor)
+		return true;
+
 	if ( !(row = mysql_fetch_row(cursor)) )
 		return true;
 	long fcount = mysql_num_fields(cursor),
@@ -312,23 +328,41 @@ bool statement_mysql::fetch()
 		if (f.str)
 		{
 			if (row[i])
+			{
 				*f.str = row[i];
+				nullfields[fieldnames[i]] = false;
+			}
 			else
+			{
 				f.str->clear();
+				nullfields[fieldnames[i]] = true;
+			}
 		}
 		else if (f.lnum)
 		{
 			if (row[i])
+			{
 				*f.lnum = std::atoi(row[i]);
+				nullfields[fieldnames[i]] = false;
+			}
 			else
+			{
 				*f.lnum = 0;
+				nullfields[fieldnames[i]] = true;
+			}
 		}
 		else if (f.dnum)
 		{
 			if (row[i])
+			{
 				*f.dnum = std::atof(row[i]);
+				nullfields[fieldnames[i]] = false;
+			}
 			else
+			{
 				*f.dnum = 0;
+				nullfields[fieldnames[i]] = true;
+			}
 		}
 		else if (f.buf)
 		{
@@ -336,14 +370,63 @@ bool statement_mysql::fetch()
 			{
 				unsigned size = f.size < f.maxlength ? f.size : f.maxlength;
 				std::memcpy(f.buf, row[i], size);
+				nullfields[fieldnames[i]] = false;
 			}
 			else
 			{
 				std::memset(f.buf, 0, f.size);
+				nullfields[fieldnames[i]] = true;
 			}
 		}
 	}
 	return false;
+}
+
+
+/*
+ * 
+ */
+bool statement_mysql::fetchhash(Hash& hash)
+{
+	MYSQL_ROW row;
+	if (!cursor)
+		return true;
+
+	hash.clear();
+	if ( !(row = mysql_fetch_row(cursor)) )
+		return true;
+	long fcount = mysql_num_fields(cursor);
+	for (long i=0; i < fcount; ++i)
+	{
+		mysql_field_s& f = bindings[i];
+		if (row[i])
+		{
+			hash[fieldnames[i]] = row[i];
+			nullfields[fieldnames[i]] = false;
+		}
+		else
+			nullfields[fieldnames[i]] = true;
+	}
+	return false;
+}
+
+
+/*
+ *
+ */
+bool statement_mysql::isnull(const std::string& fieldname)
+{
+	return nullfields[fieldname];
+}
+
+/*
+ *
+ */
+bool statement_mysql::isnull(unsigned fieldno)
+{
+	if (fieldno > fieldnames.size())
+		return true;
+	return nullfields[fieldnames[fieldno]];
 }
 
 
