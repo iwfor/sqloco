@@ -65,7 +65,7 @@ struct mysql_field_s {
 
 	std::string fieldname;
 	unsigned maxlength;
-	enum_field_types type;
+	enum_field_types type;	// Defined by MySQL
 	
 	mysql_field_s() : str(0),lnum(0),dnum(0),buf(0),size(0) {}
 	void clear() { str=0;lnum=0;dnum=0;buf=0;size=0; }
@@ -105,7 +105,6 @@ public:
 	bool fetchhash(Hash& hash);
 	bool isnull(const std::string& fieldname);
 	bool isnull(unsigned fieldno);
-	long getuid();
 	
 private:
 	statement_mysql();
@@ -119,7 +118,6 @@ private:
 	std::vector< std::string > fieldnames;
 	std::vector< mysql_field_s > bindings;
 	std::map< std::string, bool > nullfields;
-	unsigned currow;
 	MYSQL_RES* cursor;
 };
 

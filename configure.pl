@@ -85,31 +85,40 @@ GetOptions(
 	'help',
 	'developer',
 	'prefix=s',
-	'bindir=s',
 	'incdir=s',
 	'libdir=s',
-	'with-mysql=s'
+	'with-mysql=s',
+	'with-postgresql=s',
+	'without-mysql',
+	'without-postgresql'
 ) or usage();
 $clo{'help'} && usage();
 
 sub usage {
 	print "Usage: $0 [options]\n", <<EOT;
-  --developer        Turn on developer mode
+  --developer              Turn on developer mode
 
-  --prefix path      Set the install prefix to path  [/usr/local]
-  --bindir path      Set the install bin dir to path [PREFIX/bin]
-  --incdir path      Set the install inc dir to path [PREFIX/inc]
-  --libdir path      Set the install lib dir to path [PREFIX/lib]
+  --prefix path            Set the install prefix to path  [/usr/local]
+  --incdir path            Set the install inc dir to path [PREFIX/inc]
+  --libdir path            Set the install lib dir to path [PREFIX/lib]
 
-  --with-mysql       Set path to MySQL files
+By default, configure.pl will search installed databases.  If search is not
+successfull, you should specify the locations of database libraries you use.
+
+  --with-mysql path        Set path to MySQL files
+  --with-postgresql path   Set path to Postgresql files
+
+  --without-mysql	       Do not include MySQL support
+  --without-postgresql     Do not include Postgresql support
 EOT
 	exit;
 }
 
 $clo{'prefix'}	||= "/usr/local";
-$clo{'bindir'}	||= "$clo{'prefix'}/bin";
 $clo{'incdir'}	||= "$clo{'prefix'}/include";
 $clo{'libdir'}	||= "$clo{'prefix'}/lib";
+
+my $libcnt = 0;
 
 # Verify CXX
 if (not -e $ENV{'CXX'}) {
@@ -121,28 +130,39 @@ print "C++ Compiler... $ENV{'CXX'}\n";
 # Check for databases
 my $finc;
 my $flib;
-($finc, $flib) = find_mysql();
-if ($finc) {
-	$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_MYSQL";
-	$dbs{'mysql'} = 1;
-	$libraries.= "--linkwith '$flib,mysqlclient' ";
-	if ($finc ne "system") {
-		$includes.= "--include '$finc' ";
+if (!$clo{'without-mysql'}) {
+	($finc, $flib) = find_mysql();
+	if ($finc) {
+		$libcnt++;
+		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_MYSQL";
+		$dbs{'mysql'} = 1;
+		$libraries.= "--linkwith '$flib,mysqlclient' ";
+		if ($finc ne "system") {
+			$includes.= "--include '$finc' ";
+		}
 	}
 }
-$finc = find_postgresql();
-if ($finc) {
-	$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_POSTGRESQL";
-	$dbs{'postgresql'} = 1;
-	$libraries.= "--linkwith '$flib,pq' ";
-	if ($finc ne "system") {
-		$includes.= "--include '$finc' ";
+if (!$clo{'without-postgresql'}) {
+	$finc = find_postgresql();
+	if ($finc) {
+		$libcnt++;
+		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_POSTGRESQL";
+		$dbs{'postgresql'} = 1;
+		$libraries.= "--linkwith '$flib,pq' ";
+		if ($finc ne "system") {
+			$includes.= "--include '$finc' ";
+		}
 	}
 }
 
 my $mkmf_flags  = "--cxxflags '$cxxflags' --quiet ";
 if ($clo{'developer'}) {
 	$mkmf_flags .= "--developer ";
+}
+
+if (!$libcnt) {
+	print "No databases found.  Cannot proceed.\n";
+	exit;
 }
 
 print "Generating SQLoco Makefiles ";
@@ -281,6 +301,7 @@ sub find_mysql {
 
 #
 # Search for a PostgreSQL install
+# Note: May want to use pg_config in future if available.
 #
 sub find_postgresql {
 	my $flib;

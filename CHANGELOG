@@ -6,6 +6,9 @@ Version 0.53
   support.
 - Adding much needed documentation.
 - Adding more 'convenience' functions.
+- Dropped statement::getuid().
+- Corrections and improvements to configure.pl.
+- Added Postgresql support.
 
 Version 0.52
 ------------

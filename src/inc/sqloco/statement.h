@@ -76,7 +76,6 @@ public:
 	virtual bool fetchhash(Hash& hash) = 0;
 	virtual bool isnull(const std::string& fieldname) = 0;
 	virtual bool isnull(unsigned fieldno) = 0;
-	virtual long getuid() = 0;
 };
 
 } // end namespace sqloco

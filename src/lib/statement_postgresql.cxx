@@ -1,5 +1,5 @@
 /*
- * statement_mysql.cxx
+ * statement_postgresql.cxx
  *
  * $Id$
  *
@@ -38,11 +38,11 @@
  *
  */
 
-#ifdef SQLOCO_ENABLE_MYSQL
+#ifdef SQLOCO_ENABLE_POSTGRESQL
 
-#include "statement_mysql.h"
+#include "statement_postgresql.h"
 #include "dbi_impl.h"
-#include "dbi_mysql.h"
+#include "dbi_postgresql.h"
 #include <sqloco/statement.h>
 #include <sqloco/dbi.h>
 #include <cstdio>
@@ -57,8 +57,9 @@ namespace sqloco {
 /*
  * 
  */
-statement_mysql::statement_mysql(dbi_impl* d, const char* stmt)
-	: statement(stmt), dbhi(dynamic_cast<dbi_mysql*>(d)), cursor(0)
+statement_postgresql::statement_postgresql(dbi_impl* d, const char* stmt)
+	: statement(stmt), dbhi(dynamic_cast<dbi_postgresql*>(d)), cursor(0),
+	numrows(0), curfield(0), currow(0)
 {
 	dbhi->regsth(this);
 }
@@ -67,24 +68,27 @@ statement_mysql::statement_mysql(dbi_impl* d, const char* stmt)
 /*
  * 
  */
-statement_mysql::~statement_mysql()
+statement_postgresql::~statement_postgresql()
 {
 	dbhi->unregsth(this);
 	if (cursor)
-		mysql_free_result(cursor);
+		PQclear(cursor);
 }
 
 
 /*
  * 
  */
-void statement_mysql::finish()
+void statement_postgresql::finish()
 {
 	if (cursor)
 	{
-		mysql_free_result(cursor);
+		PQclear(cursor);
 		cursor = 0;
 	}
+	numrows = 0;
+	curfield = 0;
+	currow = 0;
 	bindings.clear();
 	fieldnames.clear();
 }
@@ -93,7 +97,7 @@ void statement_mysql::finish()
 /* 
  *
  */
-void statement_mysql::addparam(long num)
+void statement_postgresql::addparam(long num)
 {   
 	char buf[32];
 	std::sprintf(buf, "%ld", num);
@@ -104,7 +108,7 @@ void statement_mysql::addparam(long num)
 /*
  * 
  */
-void statement_mysql::addparam(unsigned long num)
+void statement_postgresql::addparam(unsigned long num)
 {
 	char buf[32];
 	std::sprintf(buf, "%lu", num);
@@ -115,7 +119,7 @@ void statement_mysql::addparam(unsigned long num)
 /*
  * 
  */
-void statement_mysql::addparam(double num)
+void statement_postgresql::addparam(double num)
 {
 	char buf[32];
 	std::sprintf(buf, "%lf", num);
@@ -126,7 +130,7 @@ void statement_mysql::addparam(double num)
 /*
  * 
  */
-void statement_mysql::addparam(const char* str, unsigned length)
+void statement_postgresql::addparam(const char* str, unsigned length)
 {   
 	if (!str)
 	{   
@@ -139,8 +143,8 @@ void statement_mysql::addparam(const char* str, unsigned length)
 	unsigned buflength = length*2 + 1;  // 1 for null
 	std::string fmt("'");
 	char* buf = new char[buflength];
-	try {
-		mysql_real_escape_string(dbhi->conn, buf, str, length);
+	try {	// Make sure memory is not leaked if there is an exception.
+		PQescapeString(buf, str, length);
 		fmt+= buf;
 		fmt+= '\'';
 	} catch(...) {
@@ -155,7 +159,7 @@ void statement_mysql::addparam(const char* str, unsigned length)
 /*
  *
  */
-void statement_mysql::addparam(const std::string& str)
+void statement_postgresql::addparam(const std::string& str)
 {
 	addparam(str.c_str(), str.length());
 }
@@ -164,10 +168,10 @@ void statement_mysql::addparam(const std::string& str)
 /*
  *
  */
-long statement_mysql::execute()
+long statement_postgresql::execute()
 {
 	if (cursor)
-		mysql_free_result(cursor);
+		PQclear(cursor);
 	cursor = 0;
 
 	// Clear storage
@@ -215,35 +219,35 @@ long statement_mysql::execute()
 		}
 	}
 
-	if (mysql_real_query(dbhi->conn, stmt.c_str(),
-				stmt.length()))
-	{
+	if ((cursor = PQexec(dbhi->conn, stmt.c_str())) == 0)
 		return -1;
-	}
-	
-	if ( !(cursor = mysql_store_result(dbhi->conn)) )
-		return mysql_affected_rows(dbhi->conn);
+
+	char *tuples = PQcmdTuples(cursor);
+	if ( *tuples != '\0' )
+		return std::atoi(tuples);
 
 	unsigned int num_fields, i;
-	MYSQL_FIELD *fields;
-	num_fields = mysql_num_fields(cursor);
-	fields = mysql_fetch_fields(cursor);
+	num_fields = PQnfields(cursor);
 	for(i = 0; i < num_fields; i++)
-		fieldnames.push_back(fields[i].name);
+		fieldnames.push_back(PQfname(cursor, i));
 
-	return mysql_num_rows(cursor);
+	numrows = PQntuples(cursor);
+	return numrows;
 }
 
 
 /*
  * 
  */
-bool statement_mysql::bind(std::string& str)
+bool statement_postgresql::bind(std::string& str)
 {
-	mysql_field_s f;
+	if (curfield >= fieldnames.size())
+		return true;
+	postgresql_field_s f;
 	f.str = &str;
-	if (f.getfieldinfo(cursor))
+	if (f.getfieldinfo(cursor, curfield))
 		return true;
+	++curfield;
 	bindings.push_back(f);
 	return false;
 }
@@ -252,20 +256,24 @@ bool statement_mysql::bind(std::string& str)
 /*
  * 
  */
-bool statement_mysql::bind(long& num)
+bool statement_postgresql::bind(long& num)
 {
-	mysql_field_s f;
+	if (curfield >= fieldnames.size())
+		return true;
+	postgresql_field_s f;
 	f.lnum = &num;
-	if (f.getfieldinfo(cursor))
+	if (f.getfieldinfo(cursor, curfield))
 		return true;
-	if (f.type != FIELD_TYPE_FLOAT &&
-			f.type != FIELD_TYPE_DECIMAL &&
-			f.type != FIELD_TYPE_LONGLONG &&
-			f.type != FIELD_TYPE_INT24 &&
-			f.type != FIELD_TYPE_LONG &&
-			f.type != FIELD_TYPE_SHORT &&
-			f.type != FIELD_TYPE_TINY)
-		return true;	// incompatible type
+//	TODO
+//	if (f.type != FIELD_TYPE_FLOAT &&
+//			f.type != FIELD_TYPE_DECIMAL &&
+//			f.type != FIELD_TYPE_LONGLONG &&
+//			f.type != FIELD_TYPE_INT24 &&
+//			f.type != FIELD_TYPE_LONG &&
+//			f.type != FIELD_TYPE_SHORT &&
+//			f.type != FIELD_TYPE_TINY)
+//		return true;	// incompatible type
+	++curfield;
 	bindings.push_back(f);
 	return false;
 }
@@ -274,20 +282,24 @@ bool statement_mysql::bind(long& num)
 /*
  * 
  */
-bool statement_mysql::bind(double& num)
+bool statement_postgresql::bind(double& num)
 {
-	mysql_field_s f;
+	if (curfield >= fieldnames.size())
+		return true;
+	postgresql_field_s f;
 	f.dnum = &num;
-	if (f.getfieldinfo(cursor))
+	if (f.getfieldinfo(cursor, curfield))
 		return true;
-	if (f.type != FIELD_TYPE_FLOAT &&
-			f.type != FIELD_TYPE_DECIMAL &&
-			f.type != FIELD_TYPE_LONGLONG &&
-			f.type != FIELD_TYPE_INT24 &&
-			f.type != FIELD_TYPE_LONG &&
-			f.type != FIELD_TYPE_SHORT &&
-			f.type != FIELD_TYPE_TINY)
-		return true;	// incompatible type
+//	TODO
+//	if (f.type != FIELD_TYPE_FLOAT &&
+//			f.type != FIELD_TYPE_DECIMAL &&
+//			f.type != FIELD_TYPE_LONGLONG &&
+//			f.type != FIELD_TYPE_INT24 &&
+//			f.type != FIELD_TYPE_LONG &&
+//			f.type != FIELD_TYPE_SHORT &&
+//			f.type != FIELD_TYPE_TINY)
+//		return true;	// incompatible type
+	++curfield;
 	bindings.push_back(f);
 	return false;
 }
@@ -296,13 +308,16 @@ bool statement_mysql::bind(double& num)
 /*
  * 
  */
-bool statement_mysql::bind(char* buf, unsigned size)
+bool statement_postgresql::bind(char* buf, unsigned size)
 {
-	mysql_field_s f;
+	if (curfield >= fieldnames.size())
+		return true;
+	postgresql_field_s f;
 	f.buf = buf;
 	f.size = size;
-	if (f.getfieldinfo(cursor))
+	if (f.getfieldinfo(cursor, curfield))
 		return true;
+	++curfield;
 	bindings.push_back(f);
 	return false;
 }
@@ -311,24 +326,24 @@ bool statement_mysql::bind(char* buf, unsigned size)
 /*
  * 
  */
-bool statement_mysql::fetch()
+bool statement_postgresql::fetch()
 {
-	MYSQL_ROW row;
 	if (!cursor)
 		return true;
-
-	if ( !(row = mysql_fetch_row(cursor)) )
+	if (currow >= numrows)
 		return true;
-	long fcount = mysql_num_fields(cursor),
-		bcount = bindings.size();
-	for (long i=0; i < fcount && i < bcount; ++i)
+
+	long bcount = bindings.size();
+	const char* result;
+	for (long i=0; i < bcount; ++i)
 	{
-		mysql_field_s& f = bindings[i];
+		postgresql_field_s& f = bindings[i];
+		result = PQgetvalue(cursor, currow, i);
 		if (f.str)
 		{
-			if (row[i])
+			if (!PQgetisnull(cursor, currow, i))
 			{
-				*f.str = row[i];
+				*f.str = result;
 				nullfields[fieldnames[i]] = false;
 			}
 			else
@@ -339,9 +354,9 @@ bool statement_mysql::fetch()
 		}
 		else if (f.lnum)
 		{
-			if (row[i])
+			if (!PQgetisnull(cursor, currow, i))
 			{
-				*f.lnum = std::atoi(row[i]);
+				*f.lnum = std::atoi(result);
 				nullfields[fieldnames[i]] = false;
 			}
 			else
@@ -352,9 +367,9 @@ bool statement_mysql::fetch()
 		}
 		else if (f.dnum)
 		{
-			if (row[i])
+			if (!PQgetisnull(cursor, currow, i))
 			{
-				*f.dnum = std::atof(row[i]);
+				*f.dnum = std::atof(result);
 				nullfields[fieldnames[i]] = false;
 			}
 			else
@@ -365,10 +380,12 @@ bool statement_mysql::fetch()
 		}
 		else if (f.buf)
 		{
-			if (row[i])
+			if (!PQgetisnull(cursor, currow, i))
 			{
-				unsigned size = f.size < f.maxlength ? f.size : f.maxlength;
-				std::memcpy(f.buf, row[i], size);
+				unsigned size = PQgetlength(cursor, currow, i);
+				// Choose the smaller buffer size for copy
+				size = (f.size < size) ? f.size : size;
+				std::memcpy(f.buf, result, size);
 				nullfields[fieldnames[i]] = false;
 			}
 			else
@@ -378,6 +395,7 @@ bool statement_mysql::fetch()
 			}
 		}
 	}
+	++currow;
 	return false;
 }
 
@@ -385,27 +403,22 @@ bool statement_mysql::fetch()
 /*
  * 
  */
-bool statement_mysql::fetchhash(Hash& hash)
+bool statement_postgresql::fetchhash(Hash& hash)
 {
-	MYSQL_ROW row;
 	if (!cursor)
+		return true;
+	if (currow >= numrows)
 		return true;
 
 	hash.clear();
-	if ( !(row = mysql_fetch_row(cursor)) )
-		return true;
-	long fcount = mysql_num_fields(cursor);
+	long fcount = fieldnames.size();
 	for (long i=0; i < fcount; ++i)
 	{
-		mysql_field_s& f = bindings[i];
-		if (row[i])
-		{
-			hash[fieldnames[i]] = row[i];
-			nullfields[fieldnames[i]] = false;
-		}
-		else
-			nullfields[fieldnames[i]] = true;
+		postgresql_field_s& f = bindings[i];
+		hash[fieldnames[i]] = PQgetvalue(cursor, currow, i);
+		nullfields[fieldnames[i]] = PQgetisnull(cursor, currow, i);;
 	}
+	++currow;
 	return false;
 }
 
@@ -413,7 +426,7 @@ bool statement_mysql::fetchhash(Hash& hash)
 /*
  *
  */
-bool statement_mysql::isnull(const std::string& fieldname)
+bool statement_postgresql::isnull(const std::string& fieldname)
 {
 	return nullfields[fieldname];
 }
@@ -421,14 +434,12 @@ bool statement_mysql::isnull(const std::string& fieldname)
 /*
  *
  */
-bool statement_mysql::isnull(unsigned fieldno)
+bool statement_postgresql::isnull(unsigned fieldno)
 {
-	if (fieldno > fieldnames.size())
-		return true;
 	return nullfields[fieldnames[fieldno]];
 }
 
 
 } // end namespace sqloco
 
-#endif // SQLOCO_ENABLE_MYSQL
+#endif // SQLOCO_ENABLE_POSTGRESQL

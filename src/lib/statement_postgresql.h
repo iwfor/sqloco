@@ -1,6 +1,6 @@
 /*
- * dbi_postgresql.cxx
- * 
+ * statement_postgresql.h
+ *
  * $Id$
  *
  * tabstop=4
@@ -40,127 +40,88 @@
  *
  */
 
-#ifdef SQLOCO_ENABLE_POSTGRESQL
+#ifndef __sqloco_statement_postgresql_h
+#define __sqloco_statement_postgresql_h
 
-#include <sqloco/dbi.h>
 #include <sqloco/statement.h>
-#include <sqloco/except.h>
-#include "dbi_impl.h"
-#include "dbi_postgresql.h"
-#include "statement_postgresql.h"
-
 #include <libpq-fe.h>
 #include <vector>
-#include <cstdio>
-#include <cstring>
-#include <iostream>
+#include <string>
+#include <queue>
+#include <map>
 
 namespace sqloco {
 
-/*
- * Construct a DBI instance for the specified database. 
- *
- */
-dbi_postgresql::dbi_postgresql() :
-	conn(0)
-{
-}
+// forward declaration
+class dbi_postgresql;
+class dbi_impl;
 
+struct postgresql_field_s {
+	std::string* str;
+	long* lnum;
+	double* dnum;
+	char* buf;
+	unsigned size;
 
-/*
- * Release resources used by this DBI instance
- */
-dbi_postgresql::~dbi_postgresql()
-{
-	close();
-}
-
-
-/*
- * Open a connection to the specified database.
- */
-bool dbi_postgresql::open(const char* username, const char* password, const char* db,
-		const char* hostname, unsigned int port)
-{
-	close();
-	if (!hostname)
-		return true;
-	std::string connstr;
-	if (db && *db)
+	std::string fieldname;
+	unsigned maxlength;
+	Oid type;
+	
+	postgresql_field_s() : str(0),lnum(0),dnum(0),buf(0),size(0) {}
+	void clear() { str=0;lnum=0;dnum=0;buf=0;size=0; }
+	bool getfieldinfo(PGresult* cursor, int index)
 	{
-		connstr+= "dbname=";
-		connstr+= db;
+		type = PQftype(cursor, index);
+		fieldname = PQfname(cursor, index);
+		maxlength = PQfsize(cursor, index);
+		return false;
 	}
-	connstr+= " hostname=";
-	connstr+= hostname;
-	if (port)
-	{
-		char buf[32];
-		std::sprintf(buf, "%u", port);
-		connstr+= " port=";
-		connstr+= buf;
-	}
-	connstr+= " user=";
-	connstr+= username;
-	connstr+= " password=";
-	connstr+= password;
-	conn = PQconnectdb(connstr.c_str());
-	if (PQstatus(conn) != CONNECTION_OK)
-	{
-		return true;
-	}
-	return false;
-}
+};
 
 
-/*
- * 
- */
-void dbi_postgresql::close()
-{
-	if (conn)
-		PQfinish(conn);
-	conn = 0;
-}
+class statement_postgresql : public statement {
+public:
+	statement_postgresql(dbi_impl* dbhi, const char*);
+	~statement_postgresql();
 
+	void addparam(long);
+	void addparam(unsigned long);
+	void addparam(double);
+	void addparam(const char*, unsigned);
+	void addparam(const std::string&);
 
-/*
- * Check if a connection is open to the server.
- */
-bool dbi_postgresql::isconnected() const
-{
-	return conn != 0;
-}
+	long execute();
+	void finish();
 
+	bool bind(std::string&);
+	bool bind(long&);
+	bool bind(double&);
+	bool bind(char*, unsigned);
 
-/*
- * Check for an error condition.
- */
-bool dbi_postgresql::error() const
-{
-	return error();
-}
+	bool fetch();
+	bool fetchhash(Hash& hash);
+	bool isnull(const std::string& fieldname);
+	bool isnull(unsigned fieldno);
+	
+private:
+	statement_postgresql();
+	// These variables are set by dbi::prepare()
+	std::string statement;
 
+	dbi_postgresql* dbhi;
 
-/*
- * Get the current error string.
- */
-const char* dbi_postgresql::errstr()
-{
-	if (!conn)
-		return "";
-	return PQerrorMessage(conn);
-}
+	// These variables are set by statement::[methods]()
+	std::queue< std::string > params;
+	std::vector< std::string > fieldnames;
+	std::vector< postgresql_field_s > bindings;
+	std::map< std::string, bool > nullfields;
+	int numrows;
+	int curfield;
+	int currow;
+	PGresult* cursor;
+};
 
-
-/*
- * Prepare a statement handle for execution.
- */
-statement* dbi_postgresql::prepare(const char* statement)
-{
-	return new statement_postgresql(this, statement);
-}
 
 } // end namespace sqloco
 
-#endif // SQLOCO_ENABLE_MYSQL
+#endif // __sqloco_statement_postgresql_h

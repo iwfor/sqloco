@@ -286,6 +286,10 @@ long dbi::executequery(const char* st, const std::string& parameter, std::string
 /**
  * Immediately execute the given statement, and retrieve a result row.
  *
+ * Note: Do not use this function to fetch binary data.  The Hash is
+ * constructed with strings.  Fetching binary data into a hash has undefined
+ * results.
+ *
  * @param	statement	Statement to execute.
  * @param	parameter	Parameter for SQL statement.
  * @param	hash		Reference to hash that will hold result row.
@@ -306,6 +310,10 @@ long dbi::executequery(const char* st, Hash& hash)
 /**
  * Immediately execute the given statement, given a single parameter, and
  * retrieve a result row.
+ *
+ * Note: Do not use this function to fetch binary data.  The Hash is
+ * constructed with strings.  Fetching binary data into a hash has undefined
+ * results.
  *
  * @param	statement	Statement to execute.
  * @param	parameter	Parameter for SQL statement.
@@ -338,7 +346,7 @@ databases dbi::gettype() const
 
 
 /**
- * Get the CQWELL version number string.
+ * Get the SQLoco version number string.
  *
  * @param	none
  * @return	Pointer to version number string.
