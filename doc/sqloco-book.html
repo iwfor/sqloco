@@ -1,406 +1,107 @@
-<HTML
-><HEAD
-><TITLE
->The SQLoco Book (Preliminary Documentation)</TITLE
-><META
-NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.73
-"></HEAD
-><BODY
-CLASS="BOOK"
-BGCOLOR="#FFFFFF"
-TEXT="#000000"
-LINK="#0000FF"
-VLINK="#840084"
-ALINK="#0000FF"
-><DIV
-CLASS="BOOK"
-><A
-NAME="AEN1"
-></A
-><DIV
-CLASS="TITLEPAGE"
-><H1
-CLASS="TITLE"
-><A
-NAME="AEN2"
->The SQLoco Book (Preliminary Documentation)</A
-></H1
-><H2
-CLASS="SUBTITLE"
->A C++ Wrapper for SQL LibrariesTemplate Scripting language for C++</H2
-><H3
-CLASS="AUTHOR"
-><A
-NAME="AEN6"
->Isaac W. Foraker</A
-></H3
-><P
-CLASS="COPYRIGHT"
->Copyright &copy; 2002 by Isaac W. Foraker</P
-><DIV
-><DIV
-CLASS="ABSTRACT"
-><A
-NAME="AEN13"
-></A
-><P
-></P
-><P
->This is documentation for SQLoco, a C++ wrapper for SQL libraries.  For the
-most up to date documentation, go to <A
-HREF="http://tazthecat.net/~isaac/sqloco/"
-TARGET="_top"
->http://tazthecat.net/~isaac/sqloco/</A
->.
-			</P
-><P
-></P
-></DIV
-></DIV
-><HR></DIV
-><DIV
-CLASS="TOC"
-><DL
-><DT
-><B
->Table of Contents</B
-></DT
-><DT
-><A
-HREF="#INTRODUCTION"
->Introduction</A
-></DT
-><DD
-><DL
-><DT
-><A
-HREF="#WHAT-IS-SQLOCO"
->What is SQLoco?</A
-></DT
-><DT
-><A
-HREF="#WHY-SQLOCO"
->Why SQLoco?</A
-></DT
-><DT
-><A
-HREF="#QUICK-EXAMPLE"
->A quick example</A
-></DT
-></DL
-></DD
-><DT
->1. <A
-HREF="#BUILD"
->Compilation and Installation</A
-></DT
-><DD
-><DL
-><DT
-><A
-HREF="#PLATFORMS"
->Supported Platforms/Compilers</A
-></DT
-><DT
-><A
-HREF="#SOURCES"
->Where to get SQLoco</A
-></DT
-><DT
-><A
-HREF="#BUILD-WINDOWS"
->Building on Windows</A
-></DT
-><DT
-><A
-HREF="#BUILD-UNIX"
->Building on Unix</A
-></DT
-></DL
-></DD
-><DT
->A. <A
-HREF="#APPENDIX"
->Project Specifics</A
-></DT
-><DD
-><DL
-><DT
-><A
-HREF="#LICENSE"
->License</A
-></DT
-><DT
-><A
-HREF="#CREDITS"
->Credits</A
-></DT
-><DT
-><A
-HREF="#BUG-REPORTING"
->Reporting bugs</A
-></DT
-></DL
-></DD
-></DL
-></DIV
-><DIV
-CLASS="PREFACE"
-><HR><H1
-><A
-NAME="INTRODUCTION"
->Introduction</A
-></H1
-><DIV
-CLASS="SECT1"
-><H1
-CLASS="SECT1"
-><A
-NAME="WHAT-IS-SQLOCO"
->What is SQLoco?</A
-></H1
-><P
->SQLoco is a C++ wrapper for SQL libraries.  The goal is to have a simple,
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>The SQLoco Book (Preliminary Documentation)</title><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><meta name="description" content="
+This is documentation for SQLoco, a C++ wrapper for SQL libraries.  For the
+most up to date documentation, go to 
+http://tazthecat.net/~isaac/sqloco/.
+			"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book"><div class="titlepage"><div><h1 class="title"><a name="id2835212"></a>The SQLoco Book (Preliminary Documentation)</h1></div><div><h2 class="subtitle">A C++ Wrapper for SQL LibrariesTemplate Scripting language for C++</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author">Isaac W. Foraker</h3></div></div></div><div><p class="copyright">Copyright © 2002-2003 Isaac W. Foraker</p></div><div><div class="abstract"><p class="title"><b>Abstract</b></p><p>
+This is documentation for SQLoco, a C++ wrapper for SQL libraries.  For the
+most up to date documentation, go to <a href="http://tazthecat.net/~isaac/sqloco/" target="_top">
+http://tazthecat.net/~isaac/sqloco/</a>.
+			</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="#introduction">Introduction</a></dt><dd><dl><dt><a href="#what-is-sqloco">What is SQLoco?</a></dt><dt><a href="#why-sqloco">Why SQLoco?</a></dt><dt><a href="#quick-example">A quick example</a></dt></dl></dd><dt>1. <a href="#build">Compilation and Installation</a></dt><dd><dl><dt><a href="#platforms">Supported Platforms/Compilers</a></dt><dt><a href="#sources">Where to get SQLoco</a></dt><dt><a href="#build-windows">Building on Windows</a></dt><dt><a href="#build-unix">Building on Unix</a></dt></dl></dd><dt>A. <a href="#appendix">Project Specifics</a></dt><dd><dl><dt><a href="#license">License</a></dt><dt><a href="#credits">Credits</a></dt><dt><a href="#bug-reporting">Reporting bugs</a></dt></dl></dd></dl></div><div class="preface"><div class="titlepage"><div><h2 class="title"><a name="introduction"></a>Introduction</h2></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="#what-is-sqloco">What is SQLoco?</a></dt><dt><a href="#why-sqloco">Why SQLoco?</a></dt><dt><a href="#quick-example">A quick example</a></dt></dl></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="what-is-sqloco"></a>What is SQLoco?</h2></div></div><p>
+SQLoco is a C++ wrapper for SQL libraries.  The goal is to have a simple,
 uniform interface for accessing any SQL library on any platform that supports
 standard C++. This early release will focus on MySQL and later on PostgreSQL.
 Contributors are welcome to add support for other databases, and feedback is
 welcome. 
-		</P
-><P
->SQLoco is modeled on the DBI module used with Perl.  This is done to simplify
+		</p><p>
+SQLoco is modeled on the DBI module used with Perl.  This is done to simplify
 learning the SQLoco interface, though there are some differences from the Perl
 module.  This source is released under a BSD style license, which means it is
 free as long as you credit the original authors. 
-		</P
-></DIV
-><DIV
-CLASS="SECT1"
-><HR><H1
-CLASS="SECT1"
-><A
-NAME="WHY-SQLOCO"
->Why SQLoco?</A
-></H1
-><P
->There are currently many libraries that deal with accessing SQL servers.  Every
+		</p></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="why-sqloco"></a>Why SQLoco?</h2></div></div><p>
+There are currently many libraries that deal with accessing SQL servers.  Every
 time I would switch platforms, I found myself learning a new library.  SQLoco
 is intended to provide an easy to learn, free interface to any database.
-		</P
-></DIV
-><DIV
-CLASS="SECT1"
-><HR><H1
-CLASS="SECT1"
-><A
-NAME="QUICK-EXAMPLE"
->A quick example</A
-></H1
-><P
->Assuming your application has already opened a connection to the database, an
+		</p></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="quick-example"></a>A quick example</h2></div></div><p>
+Assuming your application has already opened a connection to the database, an
 accessor function may look like this:
-		</P
-><P
->		<PRE
-CLASS="PROGRAMLISTING"
->void myFunc(sqloco::dbi&#38; dbh, std::string param)
+		</p><p>
+		</p><pre class="programlisting">
+void myFunc(sqloco::dbi&amp; dbh, std::string param)
 {
 	sqloco::statement* sth;
 
 	sth = dbh.prepare(
-		"SELECT		column1, column2, column3\n"
-		"FROM		mytable\n"
-		"WHERE		column4=?\n"
-		"ORDER BY	column1\n"
+		&quot;SELECT		column1, column2, column3\n&quot;
+		&quot;FROM		mytable\n&quot;
+		&quot;WHERE		column4=?\n&quot;
+		&quot;ORDER BY	column1\n&quot;
 		);
-	sth-&#62;addparam(param);
-	if (sth-&#62;execute() &#60; 0)
+	sth-&gt;addparam(param);
+	if (sth-&gt;execute() &lt; 0)
 	{
-		std::cerr &#60;&#60; "Error: " &#60;&#60; dbh.errstr() &#60;&#60; std::endl;
+		std::cerr &lt;&lt; &quot;Error: &quot; &lt;&lt; dbh.errstr() &lt;&lt; std::endl;
 		delete sth;
 		return;
 	}
 	sqloco::Hash hash;
-	while (!sth-&#62;fetchhash(hash))
+	while (!sth-&gt;fetchhash(hash))
 	{
-		std::cout &#60;&#60; hash["column1"] &#60;&#60; ", " &#60;&#60; hash["column2"]
-			&#60;&#60; ", " &#60;&#60; hash["column3"] &#60;&#60; std::endl;
+		std::cout &lt;&lt; hash[&quot;column1&quot;] &lt;&lt; &quot;, &quot; &lt;&lt; hash[&quot;column2&quot;]
+			&lt;&lt; &quot;, &quot; &lt;&lt; hash[&quot;column3&quot;] &lt;&lt; std::endl;
 	}
 	delete sth;
-}</PRE
->
-		</P
-></DIV
-></DIV
-><DIV
-CLASS="CHAPTER"
-><HR><H1
-><A
-NAME="BUILD"
->Chapter 1. Compilation and Installation</A
-></H1
-><DIV
-CLASS="SECT1"
-><H1
-CLASS="SECT1"
-><A
-NAME="PLATFORMS"
->Supported Platforms/Compilers</A
-></H1
-><P
->SQLoco has been compiled and tested on the following platforms.  This should
-not be considered a definitive list since SQLoco is designed to be portable.
-		</P
-><P
-></P
-><TABLE
-BORDER="0"
-><TBODY
-><TR
-><TD
->FreeBSD 4.6 GCC 3.2</TD
-></TR
-><TR
-><TD
->OS X 10.1 GCC 3.1 (Apple version 1041)</TD
-></TR
-></TBODY
-></TABLE
-><P
-></P
-><P
->SQLoco should build on any platform that supports GCC 3.1.1.  The Microsoft
-Visual C++ 7 compiler will also be supported.
-		</P
-></DIV
-><DIV
-CLASS="SECT1"
-><HR><H1
-CLASS="SECT1"
-><A
-NAME="SOURCES"
->Where to get SQLoco</A
-></H1
-><P
-></P
-><TABLE
-BORDER="0"
-><TBODY
-><TR
-><TD
->				<A
-HREF="http://tazthecat.net/~isaac/sqloco/download.cgi"
-TARGET="_top"
->				http://tazthecat.net/~isaac/sqloco/download.cgi</A
->
-			</TD
-></TR
-></TBODY
-></TABLE
-><P
-></P
-></DIV
-><DIV
-CLASS="SECT1"
-><HR><H1
-CLASS="SECT1"
-><A
-NAME="BUILD-WINDOWS"
->Building on Windows</A
-></H1
-><P
->SQLoco is being written with MSVC++ 7 (aka .Net) in mind.  At the time of this
-writing, project files are not yet available.  SQLoco should build under the
-Cygwin environment using the Unix build instructions.
-		</P
-></DIV
-><DIV
-CLASS="SECT1"
-><HR><H1
-CLASS="SECT1"
-><A
-NAME="BUILD-UNIX"
->Building on Unix</A
-></H1
-><P
->SQLoco will build with GCC 3.1 or greater.  Early versions of GCC are not
-supported.
-		</P
-><P
->The configure.pl script will attempt to automatically identify which SQL
-libraries you have installed.  In case it fails, you must specify the locations
-of the libraries manually.  Use the --help option for instructions.
-		</P
-><A
-NAME="AEN52"
-></A
-><BLOCKQUOTE
-CLASS="BLOCKQUOTE"
-><PRE
-CLASS="PROGRAMLISTING"
->./configure.pl [--help]
-make
-(as root)
-make install</PRE
-></BLOCKQUOTE
-><P
->By default, configure.pl will use /usr/local as the install directory, placing
-files in /usr/local/lib and /usr/local/include.  Use
---prefix=/your/install/path to override this.
-		</P
-></DIV
-></DIV
-><DIV
-CLASS="APPENDIX"
-><HR><H1
-><A
-NAME="APPENDIX"
->Appendix A. Project Specifics</A
-></H1
-><DIV
-CLASS="SECT1"
-><H1
-CLASS="SECT1"
-><A
-NAME="LICENSE"
->License</A
-></H1
-><P
-CLASS="LITERALLAYOUT"
->SQLoco&nbsp;-&nbsp;A&nbsp;C++&nbsp;wrapper&nbsp;for&nbsp;SQL&nbsp;libraries.<br>
-Copyright&nbsp;(C)&nbsp;2002&nbsp;Isaac&nbsp;W.&nbsp;Foraker&nbsp;(isaac(at)tazthecat(dot)net)<br>
-All&nbsp;Rights&nbsp;Reserved</P
-><P
->Redistribution and use in source and binary forms, with or without
+}
+</pre><p>
+		</p></div></div><div class="chapter"><div class="titlepage"><div><h2 class="title"><a name="build"></a>Chapter 1. Compilation and Installation</h2></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="#platforms">Supported Platforms/Compilers</a></dt><dt><a href="#sources">Where to get SQLoco</a></dt><dt><a href="#build-windows">Building on Windows</a></dt><dt><a href="#build-unix">Building on Unix</a></dt></dl></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="platforms"></a>Supported Platforms/Compilers</h2></div></div><p>
+			SQLoco has been compiled and tested on the following platforms.
+			This should not be considered a definitive list since SQLoco is
+			designed to be portable.
+		</p><table class="simplelist" border="0" summary="Simple list"><tr><td>FreeBSD 4.6 GCC 3.2</td></tr><tr><td>OS X 10.1 GCC 3.1 (Apple version 1041)</td></tr></table><p>
+			SQLoco should build on any platform that supports GCC 3.1.1.  The
+			Microsoft Visual C++ 7 compiler will also be supported.
+		</p></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="sources"></a>Where to get SQLoco</h2></div></div><table class="simplelist" border="0" summary="Simple list"><tr><td>
+				<a href="http://tazthecat.net/~isaac/sqloco/download.cgi" target="_top">
+					http://tazthecat.net/~isaac/sqloco/download.cgi</a>
+			</td></tr></table></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="build-windows"></a>Building on Windows</h2></div></div><p>
+			SQLoco is being written with MSVC++ 7 (aka .Net) in mind.  At the
+			time of this writing, project files are not yet available.  SQLoco
+			should build under the Cygwin environment using the Unix build
+			instructions.
+		</p></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="build-unix"></a>Building on Unix</h2></div></div><p>
+			SQLoco will build with GCC 3.1 or greater.  Early versions of GCC
+			(i.e. 2.95.x) are not supported.
+		</p><p>
+			The configure.pl script will attempt to automatically identify
+			which SQL libraries you have installed.  In case it fails, you must
+			specify the locations of the libraries manually.  Use the --help
+			option for instructions.
+		</p><blockquote class="blockquote"><pre class="programlisting">
+				./configure.pl [--help]
+				make
+				(as root)
+				make install
+			</pre></blockquote><p>
+			By default, configure.pl will use /usr/local as the install
+			directory, placing files in /usr/local/lib and /usr/local/include.
+			Use --prefix=/your/install/path to override this.
+		</p></div></div><div class="appendix"><div class="titlepage"><div><h2 class="title"><a name="appendix"></a>Appendix A. Project Specifics</h2></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="#license">License</a></dt><dt><a href="#credits">Credits</a></dt><dt><a href="#bug-reporting">Reporting bugs</a></dt></dl></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="license"></a>License</h2></div></div><div class="literallayout"><p>SQLoco - A C++ wrapper for SQL libraries.<br>
+Copyright (C) 2002-2003 Isaac W. Foraker (isaac(at)tazthecat(dot)net)<br>
+All Rights Reserved</p></div><p>
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-		</P
-><P
-></P
-><OL
-TYPE="1"
-><LI
-><P
->Redistributions of source code must retain the above copyright notice, this
+		</p><div class="orderedlist"><ol type="1"><li><p>
+Redistributions of source code must retain the above copyright notice, this
 list of conditions and the following disclaimer.
-		</P
-></LI
-><LI
-><P
->Redistributions in binary form must reproduce the above copyright notice, this
+		</p></li><li><p>
+Redistributions in binary form must reproduce the above copyright notice, this
 list of conditions and the following disclaimer in the documentation and/or
 other materials provided with the distribution.
-		</P
-></LI
-><LI
-><P
->Neither the name of the Author nor the names of its contributors may be used to
+		</p></li><li><p>
+Neither the name of the Author nor the names of its contributors may be used to
 endorse or promote products derived from this software without specific prior
 written permission.
-		</P
-></LI
-></OL
-><P
->THIS SOFTWARE AND DOCUMENTATION IS PROVIDED BY THE AUTHOR AND
+		</p></li></ol></div><p>
+THIS SOFTWARE AND DOCUMENTATION IS PROVIDED BY THE AUTHOR AND
 CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
 INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -413,69 +114,8 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
-		</P
-></DIV
-><DIV
-CLASS="SECT1"
-><HR><H1
-CLASS="SECT1"
-><A
-NAME="CREDITS"
->Credits</A
-></H1
-><A
-NAME="AEN71"
-></A
-><BLOCKQUOTE
-CLASS="BLOCKQUOTE"
-><P
-><B
->SQLoco Design, Programming and Documentation</B
-></P
-><P
-></P
-><UL
-><LI
-><P
->Isaac W. Foraker
-				(http://tazthecat.net/~isaac/)</P
-></LI
-></UL
-></BLOCKQUOTE
-><A
-NAME="AEN76"
-></A
-><BLOCKQUOTE
-CLASS="BLOCKQUOTE"
-><P
-><B
->Contributors</B
-></P
-><P
-></P
-><UL
-><LI
-><P
->None yet</P
-></LI
-></UL
-></BLOCKQUOTE
-></DIV
-><DIV
-CLASS="SECT1"
-><HR><H1
-CLASS="SECT1"
-><A
-NAME="BUG-REPORTING"
->Reporting bugs</A
-></H1
-><P
->If you encounter a bug in the SQLoco, please send an e-mail to
+		</p></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="credits"></a>Credits</h2></div></div><blockquote class="blockquote"><div class="blockquote-title"><p><b>SQLoco Design, Programming and Documentation</b></p></div><div class="itemizedlist"><ul type="disc"><li><p>Isaac W. Foraker
+				(http://tazthecat.net/~isaac/)</p></li></ul></div></blockquote><blockquote class="blockquote"><div class="blockquote-title"><p><b>Contributors</b></p></div><div class="itemizedlist"><ul type="disc"><li><p>None yet</p></li></ul></div></blockquote></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="bug-reporting"></a>Reporting bugs</h2></div></div><p>
+If you encounter a bug in the SQLoco, please send an e-mail to
 isaac(at)tazthecat(dot)net.
-	</P
-></DIV
-></DIV
-></DIV
-></BODY
-></HTML
->
+		</p></div></div></div></body></html>

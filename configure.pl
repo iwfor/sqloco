@@ -44,7 +44,6 @@ use Cwd qw(cwd chdir);
 
 #####
 # Constants
-use constant DATE		=> 'Thu May  10 4:44:54 2002';
 use constant ID			=> '$Id$';
 
 #####
