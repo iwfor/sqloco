@@ -210,6 +210,18 @@ statement* dbi::prepare(const char* statement)
 
 
 /**
+ * Prepare a statement handle for execution.
+ *
+ * @param	SQL Statement string.
+ * @return	Pointer to newly created statement handle.
+ */
+statement* dbi::prepare(const std::string& statement)
+{
+	return imp->prepare(statement.c_str());
+}
+
+
+/**
  * Immediately execute the given statement without generating a new
  * statement handle.
  *
