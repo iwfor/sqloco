@@ -253,6 +253,15 @@ sub find_mysql {
 	}
 	print "Checking for MySQL... ";
 
+	chomp ($flib = `mysql_config --libs`);
+	chomp ($finc = `mysql_config --cflags`);
+	$flib =~ s/.*-L'(.*?)'.*/$1/;
+	$finc =~ s/.*-I'(.*?)'.*/$1/;
+	if (($flib ne '') && ($finc ne '')) {
+		print "found.\n";
+		return ($finc, $flib);
+	}
+
 	my $path;
 	my @paths;
 	@paths = qw(
@@ -274,7 +283,7 @@ sub find_mysql {
 			last;
 		}
 	}
-	if (defined($finc) && defined($flib)) {
+	if (($flib ne '') && ($finc ne '')) {
 		print "found.\n";
 		return ($finc, $flib);
 	}
@@ -304,7 +313,7 @@ sub find_mysql {
 			last;
 		}
 	}
-	if (defined($finc) && defined($flib)) {
+	if (($flib ne '') && ($finc ne '')) {
 		print "found.\n";
 	} else {
 		print "not found.\n";
