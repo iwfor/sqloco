@@ -10,6 +10,7 @@ Version 0.53
 - Corrections and improvements to configure.pl.
 - Added Postgresql support.
 - General cleanups and optimizations.
+- Incorporated newer cxxflags and mkmf from cxxtools.
 
 Version 0.52
 ------------
