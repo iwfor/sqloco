@@ -191,6 +191,7 @@ sub generate_toplevel_makefile {
 
 	print SPEC "libdir=$clo{'libdir'}\n";
 	print SPEC "static-lib src/lib sqloco\n";
+	print SPEC "static-lib src/testsupp testsupp\n";
 	print SPEC "includedir=$clo{'incdir'}\n";
 	print SPEC "include-dir src/inc/sqloco sqloco\n";
 	close SPEC;
