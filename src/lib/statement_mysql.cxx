@@ -140,14 +140,15 @@ void statement_mysql::addparam(const char* str, unsigned length)
 	std::string fmt("'");
 	char* buf = new char[buflength];
 	try {
+		// Convert reserved characters in string
 		mysql_real_escape_string(dbhi->conn, buf, str, length);
 		fmt+= buf;
-		fmt+= '\'';
 	} catch(...) {
 		delete [] buf;
 		throw;
 	}
 	delete [] buf;
+	fmt+= '\'';
 	params.push(fmt);
 }
 
@@ -215,6 +216,7 @@ long statement_mysql::execute()
 		}
 	}
 
+	// Send the query
 	if (mysql_real_query(dbhi->conn, stmt.c_str(),
 				stmt.length()))
 	{

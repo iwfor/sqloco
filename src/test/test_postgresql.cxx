@@ -94,7 +94,7 @@ const unsigned num_entries = sizeof(entries) / sizeof(entry_s);
 bool test(clo::parser& parser)
 {
 	const clo::options& options = parser.get_options();
-	sqloco::dbi dbh(sqloco::db_mysql);
+	sqloco::dbi dbh(sqloco::db_postgresql);
 
 	// Open the database connection
 	if (dbh.open(options.username.c_str(), options.password.c_str()))
@@ -132,7 +132,7 @@ bool test1(sqloco::dbi& dbh)
 	// Create the first test table
 	if (dbh.execute(
 			"CREATE TABLE phonebook (\n"
-			"phid INT PRIMARY KEY AUTO_INCREMENT,\n"
+			"phid INT PRIMARY KEY IDENTITY,\n"
 			"name VARCHAR(64) NOT NULL UNIQUE,\n"
 			"phonenumber VARCHAR(64) NOT NULL)") < 0)
 	{
