@@ -15,5 +15,13 @@ This version supports:
 
 MySQL
 
-Note:
+Notes:
 This is Beta code.  Be aware that the API may change before the final release.
+
+On some platforms, you may get the following warning:
+
+cc1plus: warning: changing search order for system directory "/usr/local/include"
+cc1plus: warning:   as it has already been specified as a non-system directory
+
+This does not adversly affect the build.  This will hopefully go away in a
+future version.

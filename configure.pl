@@ -60,7 +60,6 @@ my $install_spec= "doc/install.spec";
 
 my $includes	= "--include '${cwd}/src/inc' ";
 my $libraries	= "--slinkwith '${cwd}/src/lib,$libname' ";
-my $defines		= "";
 
 my @extra_compile = (
 	"${cwd}/src/lib",
@@ -102,7 +101,7 @@ sub usage {
   --incdir path            Set the install inc dir to path [PREFIX/inc]
   --libdir path            Set the install lib dir to path [PREFIX/lib]
 
-By default, configure.pl will search installed databases.  If search is not
+By default, configure.pl will search for installed databases.  If search is not
 successfull, you should specify the locations of database libraries you use.
 
   --with-mysql path        Set path to MySQL files
@@ -207,22 +206,30 @@ sub generate_library_makefile {
 		exit 1;
 	}
 
-	system("$^X $mkmf $mkmf_flags $includes --static-lib $libname *.cxx $defines");
+	system("$^X $mkmf $mkmf_flags $includes --static-lib $libname *.cxx");
 	print ".";
 	chdir $cwd;
 }
 
 
 sub generate_tests_makefile {
+	if (not chdir("$cwd/src/testsupp")) {
+		print STDERR "\n$0: can't chdir to src/testsupp: $!\n";
+		exit 1;
+	}
+	print ".";
+	system("$^X $mkmf $mkmf_flags --static-lib sqloco_testsupp *.cxx");
+
 	if (not chdir("$cwd/src/test")) {
 		print STDERR "\n$0: can't chdir to src/test: $!\n";
 		exit 1;
 	}
 
-	if ($dbs{'mysql'}) {
-		system("$^X $mkmf $mkmf_flags $includes $libraries --one-exec test_mysql *.cxx");
-		print ".";
-	}
+	print ".";
+	my $files;
+	$files+= "test_mysql.cxx" if ($dbs{'mysql'});
+	$files+= "test_postgresql.cxx" if ($dbs{'postgresql'});
+	system("$^X $mkmf $mkmf_flags $includes $libraries --linkwith '../testsupp,sqloco_testsupp' --quiet --many-exec $files");
 	chdir $cwd;
 }
 
