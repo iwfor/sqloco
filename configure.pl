@@ -313,6 +313,7 @@ sub find_mysql {
 	return ($finc, $flib);
 }
 
+
 #
 # Search for a PostgreSQL install
 # Note: May want to use pg_config in future if available.
@@ -325,6 +326,12 @@ sub find_postgresql {
 		return "$clo{'with-postgresql'}/include";
 	}
 	print "Checking for PostgreSQL... ";
+	chomp ($flib = `pg_config --libdir`);
+	chomp ($finc = `pg_config --includedir`);
+	if (($finc ne '') && ($flib ne '')) {
+		print "found.\n";
+		return ($finc, $flib);
+	}
 
 	my $path;
 	my @paths;
@@ -343,7 +350,7 @@ sub find_postgresql {
 			last;
 		}
 	}
-	if (defined($finc) && defined($flib)) {
+	if (($finc ne '') && ($flib ne '')) {
 		print "found.\n";
 		return ($finc, $flib);
 	}
@@ -369,7 +376,7 @@ sub find_postgresql {
 			last;
 		}
 	}
-	if (defined($finc) && defined($flib)) {
+	if (($finc ne '') && ($flib ne '')) {
 		print "found.\n";
 	} else {
 		print "not found.\n";
