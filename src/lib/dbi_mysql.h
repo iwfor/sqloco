@@ -6,7 +6,6 @@
  * tabstop=4
  *
  */
-
 /*
  * Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)
  * All Rights Reserved

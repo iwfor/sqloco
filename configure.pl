@@ -50,7 +50,8 @@ use constant ID			=> '$Id$';
 # Global Variables
 use vars qw{$opt_help $opt_bundle $opt_developer $opt_prefix $opt_incdir
 	$opt_incdir $opt_libdir $opt_cxx $opt_disable_shared $opt_with_mysql
-	$opt_with_postgresql $opt_without_postgresql $opt_without_mysql};
+	$opt_with_postgresql $opt_without_postgresql $opt_without_mysql
+	$opt_with_sqlite $opt_without_sqlite};
 
 # The current directory
 my $cwd = cwd();
@@ -168,7 +169,7 @@ if (!$opt_without_mysql) {
 		} else {
 			$libraries.= "--linkwith '$flib,mysqlclient' ";
 		}
-		if (($finc ne "system") && ($finc ne "/usr/local/include")) {
+		if ($finc ne "system") {
 			$includes.= "--include '$finc' ";
 		}
 	}
@@ -180,7 +181,19 @@ if (!$opt_without_postgresql) {
 		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_POSTGRESQL";
 		$dbs{'postgresql'} = 1;
 		$libraries.= "--linkwith '$flib,pq' ";
-		if (($finc ne "system") && ($finc ne "/usr/local/include")) {
+		if ($finc ne "system") {
+			$includes.= "--include '$finc' ";
+		}
+	}
+}
+if (!$opt_without_sqlite) {
+	($finc, $flib) = find_sqlite();
+	if ($finc) {
+		$libcnt++;
+		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_SQLITE";
+		$dbs{'sqloco'} = 1;
+		$libraries.= "--linkwith '$flib,??? ";
+		if ($finc ne "system") {
 			$includes.= "--include '$finc' ";
 		}
 	}
@@ -367,10 +380,10 @@ sub find_postgresql {
 	my $flib;
 	my $finc;
 	if ($opt_with_postgresql) {
-		print "Using user setting for PostgreSQL\n";
+		print "Using user setting for Postgresql\n";
 		return "$opt_with_postgresql/include";
 	}
-	print "Checking for PostgreSQL... ";
+	print "Checking for Postgresql... ";
 	chomp ($flib = `pg_config --libdir`);
 	chomp ($finc = `pg_config --includedir`);
 	if (($finc ne '') && ($flib ne '')) {
@@ -417,6 +430,69 @@ sub find_postgresql {
 	}
 	foreach $path (@paths) {
 		if (-e "$path/lib/libpq.a") {
+			$flib = "$path/lib";
+			last;
+		}
+	}
+	if (($finc ne '') && ($flib ne '')) {
+		print "found.\n";
+	} else {
+		print "not found.\n";
+		return (undef, undef);
+	}
+	return ($finc, $flib);
+}
+
+
+sub find_sqlite {
+	my $flib;
+	my $finc;
+	if ($opt_with_sqlite) {
+		print "Using user setting for SQLite\n";
+		$finc = "$opt_with_sqlite/include";
+		$flib = "$opt_with_sqlite/lib";
+		return ($finc, $flib);
+	}
+	print "Checking for SQLite... ";
+	my $path;
+	my @paths;
+	@paths = qw(
+		/usr
+	);
+	foreach $path (@paths) {
+		if (-e "$path/include/sqlite.h") {
+			$finc = "system";
+			last;
+		}
+	}
+	foreach $path (@paths) {
+		if (-e "$path/lib/libsqlite.a") {
+			$flib = "$path/lib";
+			last;
+		}
+	}
+	if (($finc ne '') && ($flib ne '')) {
+		print "found.\n";
+		return ($finc, $flib);
+	}
+
+	@paths = qw(
+		/usr/local
+		/usr/local/pgsql
+		/usr/pgsql
+		/opt/pgsql
+		/export/pgsql
+		/home/pgsql
+	);
+
+	foreach $path (@paths) {
+		if (-e "$path/include/sqlite.h") {
+			$finc = "$path/include";
+			last;
+		}
+	}
+	foreach $path (@paths) {
+		if (-e "$path/lib/libsqlite.a") {
 			$flib = "$path/lib";
 			last;
 		}

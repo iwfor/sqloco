@@ -1,9 +1,7 @@
 /*
- * statement_mysql.h
+ * statement_sqlite.h
  *
  * $Id$
- *
- * tabstop=4
  *
  */
 /*
@@ -39,23 +37,23 @@
  *
  */
 
-#ifndef include_sqloco_statement_mysql_h
-#define include_sqloco_statement_mysql_h
-
+#ifndef include_sqloco_statement_sqlite_h
+#define include_sqloco_statement_sqlite_h
 #include <sqloco/statement.h>
-#include <mysql.h>
+#include <sqlite.h>
 #include <vector>
 #include <string>
 #include <queue>
 #include <map>
 
+
 namespace sqloco {
 
 // forward declaration
-class dbi_mysql;
+class dbi_sqlite;
 class dbi_impl;
 
-struct mysql_field_s {
+struct sqlite_field_s {
 	std::string* str;
 	long* lnum;
 	double* dnum;
@@ -64,27 +62,19 @@ struct mysql_field_s {
 
 	std::string fieldname;
 	unsigned maxlength;
-	enum_field_types type;	// Defined by MySQL
+	int type;
 	
-	mysql_field_s() : str(0),lnum(0),dnum(0),buf(0),size(0) {}
+	sqlite_field_s() : str(0),lnum(0),dnum(0),buf(0),size(0) {}
 	void clear() { str=0;lnum=0;dnum=0;buf=0;size=0; }
-	bool getfieldinfo(MYSQL_RES* cursor)
+	bool getfieldinfo()
 	{
-		MYSQL_FIELD* field;
-		if ( !(field = mysql_fetch_field(cursor)) )
-			return true;
-		fieldname = field->name;
-		maxlength = field->max_length;
-		type = field->type;
-		return false;
 	}
 };
 
-
-class statement_mysql : public statement {
+class statement_sqlite : public statement {
 public:
-	statement_mysql(dbi_impl* dbhi, const char*);
-	~statement_mysql();
+	statement_sqlite(dbi_impl* dbhi, const char*);
+	~statement_sqlite();
 
 	void addparam(long);
 	void addparam(unsigned long);
@@ -106,21 +96,23 @@ public:
 	bool isnull(unsigned fieldno);
 	
 private:
-	statement_mysql();
+	statement_sqlite();
 	// These variables are set by dbi::prepare()
-	std::string statement;
+	std::string statement_;
 
-	dbi_mysql* dbhi;
+	dbi_sqlite* dbhi_;
+    bool havecursor_;
+    struct sqlite_vm cursor_;
 
 	// These variables are set by statement::[methods]()
-	std::queue< std::string > params;
-	std::vector< std::string > fieldnames;
-	std::vector< mysql_field_s > bindings;
-	std::map< std::string, bool > nullfields;
-	MYSQL_RES* cursor;
+	std::queue< std::string > params_;
+	std::vector< std::string > fieldnames_;
+	std::vector< sqlite_field_s > bindings_;
+	std::map< std::string, bool > nullfields_;
 };
+
 
 
 } // end namespace sqloco
 
-#endif // include_sqloco_statement_mysql_h
+#endif // include_sqloco_statement_sqlite_h

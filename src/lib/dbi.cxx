@@ -54,14 +54,11 @@
 #ifdef SQLOCO_ENABLE_POSTGRESQL
 #include "dbi_postgresql.h"
 #endif
-#ifdef SQLOCO_ENABLE_MSSQL
-#include "dbi_mssql.h"
+#ifdef SQLOCO_ENABLE_SQLITE
+#include "dbi_sqlite.h"
 #endif
-#ifdef SQLOCO_ENABLE_ORACLE
-#include "dbi_oracle.h"
-#endif
-#ifdef SQLOCO_ENABLE_SYBASE
-#include "dbi_sybase.h"
+#ifdef SQLOCO_ENABLE_ODBC
+#include "dbi_odbc.h"
 #endif
 
 namespace sqloco {
@@ -88,30 +85,22 @@ dbi::dbi(databases db)
 #ifdef SQLOCO_ENABLE_POSTGRESQL
 		imp = new dbi_postgresql;
 #else
-		throw dbiexception("PostgreSQL support is not available");
+		throw dbiexception("Postgresql support is not available");
 #endif
 		break;
-	case db_mssql:
-#ifdef SQLOCO_ENABLE_MSSQL
-		imp = new dbi_mssql;
+	case db_sqlite:
+#ifdef SQLOCO_ENABLE_SQLITE
+		imp = new dbi_sqlite;
 #else
-		throw dbiexception("MS SQL support is not available");
+		throw dbiexception("SQLite support is not available");
 #endif
 		break;
-	case db_oracle:
-#ifdef SQLOCO_ENABLE_ORACLE
-		imp = new dbi_oracle;
+	case db_odbc:
+#ifdef SQL_ENABLE_ODBC
+		imp = new dbi_odbc;
 #else
-		throw dbiexception("Oracle support is not available");
+		throw dbiexception("ODBC support is not available");
 #endif
-		break;
-	case db_sybase:
-#ifdef SQLOCO_ENABLE_SYBASE
-		imp = new dbi_sybase;
-#else
-		throw dbiexception("Sybase support is not available");
-#endif
-		break;
 	default:
 		throw dbiexception("Unsupported database type");
 	}

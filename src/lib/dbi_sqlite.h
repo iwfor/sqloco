@@ -1,12 +1,9 @@
 /*
- * const.h
+ * dbi_sqlite.h
  *
  * $Id$
  *
- * tabstop=4
- *
  */
-
 /*
  * Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)
  * All Rights Reserved
@@ -40,19 +37,37 @@
  *
  */
 
+#ifndef __sqloco_dbi_sqlite_h
+#define __sqloco_dbi_sqlite_h
 
-#ifndef __sqloco_const_h
-#define __sqloco_const_h
+#include <sqloco/const.h>
+#include "dbi_impl.h"
+#include <sqlite.h>
 
 namespace sqloco {
 
-enum databases {
-	db_mysql = 0,
-	db_postgresql,
-	db_sqlite,
-	db_odbc
+class dbi_sqlite : public dbi_impl {
+public:
+	dbi_sqlite();
+	~dbi_sqlite();
+
+	bool open(const char* username, const char* password, const char* db,
+			 const char* hostname = "", unsigned int port=0);
+	void close();
+	bool error() const;
+	const char* errstr();
+	statement* prepare(const char* query);
+	bool isconnected() const;
+	databases gettype() const { return db_sqlite; }
+
+	friend class statement_sqlite;
+	 
+private:
+	sqlite* db_;
+	char* errstr_;
 };
+
 
 } // end namespace sqloco
 
-#endif // __sqloco_const_h
+#endif // __sqloco_dbi_sqlite_h

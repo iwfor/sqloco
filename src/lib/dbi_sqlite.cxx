@@ -1,9 +1,7 @@
 /*
- * statement_mysql.h
- *
+ * dbi_sqlite.cxx
+ * 
  * $Id$
- *
- * tabstop=4
  *
  */
 /*
@@ -39,88 +37,109 @@
  *
  */
 
-#ifndef include_sqloco_statement_mysql_h
-#define include_sqloco_statement_mysql_h
+// This definition forces an object to exist, preventing problems on some
+// platforms. (e.g.  MacOS X)
+const static char* module_id = "$Id$";
 
+#ifdef SQLOCO_ENABLE_SQLITE
+
+#include <sqloco/dbi.h>
 #include <sqloco/statement.h>
-#include <mysql.h>
+#include <sqloco/except.h>
+#include "dbi_impl.h"
+#include "dbi_sqlite.h"
+#include "statement_sqlite.h"
+#include <sqlite.h>
+
 #include <vector>
-#include <string>
-#include <queue>
-#include <map>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
 
 namespace sqloco {
 
-// forward declaration
-class dbi_mysql;
-class dbi_impl;
-
-struct mysql_field_s {
-	std::string* str;
-	long* lnum;
-	double* dnum;
-	char* buf;
-	unsigned size;
-
-	std::string fieldname;
-	unsigned maxlength;
-	enum_field_types type;	// Defined by MySQL
-	
-	mysql_field_s() : str(0),lnum(0),dnum(0),buf(0),size(0) {}
-	void clear() { str=0;lnum=0;dnum=0;buf=0;size=0; }
-	bool getfieldinfo(MYSQL_RES* cursor)
-	{
-		MYSQL_FIELD* field;
-		if ( !(field = mysql_fetch_field(cursor)) )
-			return true;
-		fieldname = field->name;
-		maxlength = field->max_length;
-		type = field->type;
-		return false;
-	}
-};
+/*
+ * Construct a DBI instance for the specified database. 
+ *
+ */
+dbi_sqlite::dbi_sqlite() :
+	db_(0), errstr_("")
+{
+}
 
 
-class statement_mysql : public statement {
-public:
-	statement_mysql(dbi_impl* dbhi, const char*);
-	~statement_mysql();
+/*
+ * Release resources used by this DBI instance
+ */
+dbi_sqlite::~dbi_sqlite()
+{
+	close();
+}
 
-	void addparam(long);
-	void addparam(unsigned long);
-	void addparam(double);
-	void addparam(const char*, unsigned);
-	void addparam(const std::string&);
 
-	long execute();
-	void finish();
+/*
+ * Open a connection to the specified database.
+ */
+bool dbi_sqlite::open(const char* username, const char* password, const char* db,
+		const char* hostname, unsigned int port)
+{
+	close();
+	if (!hostname)
+		return true;
+	db_ = sqlite_open(db, 0, &errstr_);
+	if (!db_)
+		return true;
+	return false;
+}
 
-	bool bind(std::string&);
-	bool bind(long&);
-	bool bind(double&);
-	bool bind(char*, unsigned);
 
-	bool fetch();
-	bool fetchhash(Hash& hash);
-	bool isnull(const std::string& fieldname);
-	bool isnull(unsigned fieldno);
-	
-private:
-	statement_mysql();
-	// These variables are set by dbi::prepare()
-	std::string statement;
+/*
+ * 
+ */
+void dbi_sqlite::close()
+{
+	if (db_)
+		sqlite_close(db_);
+	db_ = 0;
+}
 
-	dbi_mysql* dbhi;
 
-	// These variables are set by statement::[methods]()
-	std::queue< std::string > params;
-	std::vector< std::string > fieldnames;
-	std::vector< mysql_field_s > bindings;
-	std::map< std::string, bool > nullfields;
-	MYSQL_RES* cursor;
-};
+/*
+ * Check if a connection is open to the server.
+ */
+bool dbi_sqlite::isconnected() const
+{
+	return db_ != 0;
+}
 
+
+/*
+ * Check for an error condition.
+ */
+bool dbi_sqlite::error() const
+{
+	return error();
+}
+
+
+/*
+ * Get the current error string.
+ */
+const char* dbi_sqlite::errstr()
+{
+	return errstr_;
+}
+
+
+/*
+ * Prepare a statement handle for execution.
+ */
+statement* dbi_sqlite::prepare(const char* statement)
+{
+	return new statement_sqlite(this, statement);
+}
 
 } // end namespace sqloco
 
-#endif // include_sqloco_statement_mysql_h
+#endif // SQLOCO_ENABLE_SQLITE
+
