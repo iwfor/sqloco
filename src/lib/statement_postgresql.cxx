@@ -175,7 +175,6 @@ void statement_postgresql::addparam(const std::string& str)
  */
 long statement_postgresql::execute()
 {
-	bool isinsert = false;
 	if (cursor)
 		PQclear(cursor);
 	cursor = 0;
@@ -185,21 +184,14 @@ long statement_postgresql::execute()
 	nullfields.clear();
 	bindings.clear();
 
-	// Determine if statement is an insert
-	std::string::const_iterator it(statement.begin()),
-		end(statement.end());
-	while (it != end && std::isspace(*it))
-		++it;
-	if (*it == 'I' || *it == 'i')	// This must be an 'I'nsert
-		isinsert = true;
-
 	// read through statement, replacing ? with values added with
 	// addparam() functions.
 	// TODO: Merge this step into a common function shared with MySQL library.
 	std::string stmt;
 	bool in1str=false;
 	bool in2str=false;
-	it = statement.begin();
+	std::string::const_iterator it(statement.begin()),
+		end(statement.end());
 	for (; it != end; ++it)
 	{
 		if (in1str || in2str)
@@ -235,13 +227,13 @@ long statement_postgresql::execute()
 
 	if ((cursor = PQexec(dbhi->conn, stmt.c_str())) == 0)
 		return -1;
+	ExecStatusType rc = PQresultStatus(cursor);
+	if (rc != PGRES_COMMAND_OK && rc != PGRES_TUPLES_OK)
+		return -1;
 
 	char *tuples = PQcmdTuples(cursor);
-	if (tuples && (*tuples != '\0' || isinsert)) {
+	if (tuples && (*tuples != '\0')) {	// Empty string on Select
 		numrows = std::atoi(tuples);
-		if (!numrows && isinsert) {
-			return -1;
-		}
 		return numrows;
 	}
 

@@ -2,9 +2,10 @@ SQLoco - A C++ wrapper for SQL libraries
 
 Version 0.55
 ------------
-- Updated Postgresql search in configure.pl to use pg_config utility, if available.
-- Possibly fixed bug in execute where an error was not being returned on a bad
-  INSERT command.
+- Major fix of catching error codes in Postgresql statement::execute.
+- Configure can now search for an installed compiler if one is not specified.
+- Configure now tries to use pg_config and mysql_config to determine
+  installation information.
 
 Version 0.54
 ------------
