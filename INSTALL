@@ -4,6 +4,11 @@ All Rights Reserved
 
 See LICENSE file for license information.
 
+Requirements:
+
+	An ISO standard C++ compiler (e.g. GCC 3.x).
+	Client libraries for the target SQL databases.
+
 Run
 
 	perl configure.pl

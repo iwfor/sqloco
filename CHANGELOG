@@ -12,6 +12,7 @@ Version 0.53
 - General cleanups and optimizations.
 - Incorporated newer cxxflags and mkmf from cxxtools.
 - configure.pl will now user libmysqlclient_r.a if available.
+- Fixed support for Mac OS X.
 
 Version 0.52
 ------------
