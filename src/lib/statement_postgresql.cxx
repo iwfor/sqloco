@@ -40,7 +40,7 @@
 
 // This definition forces an object to exist, preventing problems on some
 // platforms. (e.g.  MacOS X)
-const static char* desc="$Id$";
+const static char* module_id="$Id$";
 
 #ifdef SQLOCO_ENABLE_POSTGRESQL
 
