@@ -11,6 +11,7 @@ Version 0.53
 - Added Postgresql support.
 - General cleanups and optimizations.
 - Incorporated newer cxxflags and mkmf from cxxtools.
+- configure.pl will now user libmysqlclient_r.a if available.
 
 Version 0.52
 ------------

@@ -160,7 +160,7 @@ if (!$clo{'without-postgresql'}) {
 	}
 }
 
-my $mkmf_flags  = "--cxxflags '$cxxflags' --quiet ";
+my $mkmf_flags  = "--cxxflags '$cxxflags' --mt --quiet ";
 if ($clo{'developer'}) {
 	$mkmf_flags .= "--developer ";
 }
