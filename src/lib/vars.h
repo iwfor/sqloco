@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2002 Isaac W. Foraker (isaac@tazthecat.net)
+ * Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)
  * All Rights Reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #ifndef ___vars_h
 #define ___vars_h
 
-#define VERSION	"0.54"
+#define VERSION	"0.55"
 
 // Anonymous namespace
 namespace {
@@ -51,7 +51,7 @@ namespace {
 	const char* sqloco_libname = "SQLoco version " VERSION;
 	const char* sqloco_author = "Isaac W. Foraker";
 	const char* sqloco_license =
-"Copyright (C) 2002 Isaac W. Foraker (isaac@tazthecat.net)\n"
+"Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)\n"
 "All Rights Reserved\n\n"
 
 "Redistribution and use in source and binary forms, with or without\n"
