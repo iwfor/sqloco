@@ -97,23 +97,28 @@ bool test(clo::parser& parser)
 	sqloco::statement* sth;
 	unsigned i;
 
+	// Open the database connection
 	if (dbh.open(options.username.c_str(), options.password.c_str()))
 	{
 		std::cout << "Failed to connect to database: " << dbh.errstr() << std::endl;
 		return true;
 	}
 
+	// Create a test database
 	if (dbh.execute("CREATE DATABASE sqloco_test") < 0)
 	{
 		std::cout << "Failed to create database: " << dbh.errstr() << std::endl;
 		return true;
 	}
+
+	// Switch to the test database
 	if (dbh.execute("USE sqloco_test") < 0)
 	{
 		std::cout << "Failed to use database: " << dbh.errstr() << std::endl;
 		return true;
 	}
-	
+
+	// Create the first test table
 	if (dbh.execute(
 			"CREATE TABLE phonebook (\n"
 			"phid INT PRIMARY KEY AUTO_INCREMENT,\n"
@@ -124,6 +129,7 @@ bool test(clo::parser& parser)
 		return true;
 	}
 
+	// Populate the first test table.
 	sth = dbh.prepare("INSERT INTO phonebook (name, phonenumber)\n"
 			"VALUES (?, ?)");
 	for (i=0; i<num_entries; ++i)
@@ -133,7 +139,8 @@ bool test(clo::parser& parser)
 		sth->execute();
 	}
 	delete sth;
-	
+
+	// Retrieve entries for first table
 	sth = dbh.prepare("SELECT * FROM phonebook ORDER BY name");
 	if (sth->execute() < 0)
 	{
@@ -150,9 +157,10 @@ bool test(clo::parser& parser)
 		std::cout << "phid: " << phid << std::endl;
 		std::cout << "name: " << name << std::endl;
 		std::cout << "ph #: " << number << std::endl;
+		// TODO: check these entries against entries struct/array
 	}
 
-	// re-execute query
+	// Try the same query, but fetched into a hash
 	if (sth->execute() < 0)
 	{
 		std::cout << "Failed query: " << dbh.errstr() << std::endl;
@@ -167,6 +175,7 @@ bool test(clo::parser& parser)
 	}
 	delete sth;
 
+	// Create the second test table
 	dbh.execute(
 			"CREATE TABLE misctest (\n"
 			"somefield varchar(8))"
@@ -175,6 +184,7 @@ bool test(clo::parser& parser)
 	dbh.execute("INSERT INTO misctest VALUES (null)");
 	dbh.execute("INSERT INTO misctest VALUES ('goodbye')");
 
+	// Read the second test table, making sure NULL detection works
 	sth = dbh.prepare("SELECT * FROM misctest\n");
 	sth->execute();
 	sth->bind(name);
@@ -189,6 +199,8 @@ bool test(clo::parser& parser)
 	}
 	delete sth;
 
+	// Clean up the database
 	dbh.execute("DROP DATABASE sqloco_test");
 	return false;
 }
+

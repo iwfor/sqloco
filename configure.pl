@@ -111,7 +111,14 @@ $clo{'bindir'}	||= "$clo{'prefix'}/bin";
 $clo{'incdir'}	||= "$clo{'prefix'}/include";
 $clo{'libdir'}	||= "$clo{'prefix'}/lib";
 
-print "Detecting databases...\n";
+# Verify CXX
+if (not -e $ENV{'CXX'}) {
+	print "The specified compiler, $ENV{'CXX'}, does not appear to exist.\n";
+	exit;
+}
+print "C++ Compiler... $ENV{'CXX'}\n";
+
+# Check for databases
 my $finc;
 my $flib;
 ($finc, $flib) = find_mysql();
@@ -123,15 +130,15 @@ if ($finc) {
 		$includes.= "--include '$finc' ";
 	}
 }
-#$finc = find_postgresql();
-#if ($finc) {
-#	$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_POSTGRESQL";
-#	$dbs{'postgresql'} = 1;
-#	$libraries.= "--linkwith '$flib,pq' ";
-#	if ($finc ne "system") {
-#		$includes.= "--include '$finc' ";
-#	}
-#}
+$finc = find_postgresql();
+if ($finc) {
+	$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_POSTGRESQL";
+	$dbs{'postgresql'} = 1;
+	$libraries.= "--linkwith '$flib,pq' ";
+	if ($finc ne "system") {
+		$includes.= "--include '$finc' ";
+	}
+}
 
 my $mkmf_flags  = "--cxxflags '$cxxflags' --quiet ";
 if ($clo{'developer'}) {
@@ -291,14 +298,12 @@ sub find_postgresql {
 	);
 	foreach $path (@paths) {
 		if (-e "$path/include/libpq-fe.h") {
-			print "found.\n";
 			$finc = "system";
 			last;
 		}
 	}
 	foreach $path (@paths) {
 		if (-e "$path/lib/libpq.a") {
-			print "found.\n";
 			$flib = "$path/lib";
 			last;
 		}
@@ -319,14 +324,12 @@ sub find_postgresql {
 
 	foreach $path (@paths) {
 		if (-e "$path/include/libpq-fe.h") {
-			print "found.\n";
 			$finc = "$path/include";
 			last;
 		}
 	}
 	foreach $path (@paths) {
 		if (-e "$path/lib/libpq.a") {
-			print "found.\n";
 			$flib = "$path/lib";
 			last;
 		}

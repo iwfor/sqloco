@@ -44,6 +44,7 @@
 #ifndef __sqloco_dbi_h
 #define __sqloco_dbi_h
 
+#include "statement.h"
 #include "const.h"
 #include <string>
 
@@ -89,7 +90,13 @@ public:
 	long executequery(const char* st, std::string& value);
 
 	/// Execute a query and get its response.
+	long executequery(const char* st, Hash& hash);
+
+	/// Execute a query and get its response.
 	long executequery(const char* st, const std::string& parameter, std::string& value);
+
+	/// Execute a query and get its response.
+	long executequery(const char* st, const std::string& parameter, Hash& hash);
 
 	/// Check if connected to the server.
 	operator bool() const;

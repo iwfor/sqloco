@@ -233,7 +233,6 @@ long dbi::execute(const char* st)
 {
 	statement* sth = prepare(st);
 	long rval = sth->execute();
-	sth->finish();
 	delete sth;
 	return rval;
 }
@@ -255,7 +254,6 @@ long dbi::executequery(const char* st, std::string& value)
 		sth->bind(value);
 		sth->fetch();
 	}
-	sth->finish();
 	delete sth;
 	return rval;
 }
@@ -280,7 +278,48 @@ long dbi::executequery(const char* st, const std::string& parameter, std::string
 		sth->bind(value);
 		sth->fetch();
 	}
-	sth->finish();
+	delete sth;
+	return rval;
+}
+
+
+/**
+ * Immediately execute the given statement, and retrieve a result row.
+ *
+ * @param	statement	Statement to execute.
+ * @param	parameter	Parameter for SQL statement.
+ * @param	hash		Reference to hash that will hold result row.
+ * @return	Number of rows affected;
+ * @return	-1 on error.
+ */
+long dbi::executequery(const char* st, Hash& hash)
+{
+	statement* sth = prepare(st);
+	long rval = sth->execute();
+	if (rval >= 0)
+		sth->fetchhash(hash);
+	delete sth;
+	return rval;
+}
+
+
+/**
+ * Immediately execute the given statement, given a single parameter, and
+ * retrieve a result row.
+ *
+ * @param	statement	Statement to execute.
+ * @param	parameter	Parameter for SQL statement.
+ * @param	hash		Reference to hash that will hold result row.
+ * @return	Number of rows affected;
+ * @return	-1 on error.
+ */
+long dbi::executequery(const char* st, const std::string& parameter, Hash& hash)
+{
+	statement* sth = prepare(st);
+	sth->addparam(parameter);
+	long rval = sth->execute();
+	if (rval >= 0)
+		sth->fetchhash(hash);
 	delete sth;
 	return rval;
 }

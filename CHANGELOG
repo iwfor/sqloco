@@ -1,5 +1,12 @@
 SQLoco - A C++ wrapper for SQL libraries
 
+Version 0.53
+------------
+- Changed basic_string<>::clear() to basic_string::erase() for broader compiler
+  support.
+- Adding much needed documentation.
+- Adding more 'convenience' functions.
+
 Version 0.52
 ------------
 - Added two new forms of execute for simplified programming.

@@ -334,7 +334,7 @@ bool statement_mysql::fetch()
 			}
 			else
 			{
-				f.str->clear();
+				f.str->erase();
 				nullfields[fieldnames[i]] = true;
 			}
 		}
