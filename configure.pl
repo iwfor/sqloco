@@ -136,7 +136,7 @@ if (!$clo{'without-mysql'}) {
 		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_MYSQL";
 		$dbs{'mysql'} = 1;
 		$libraries.= "--linkwith '$flib,mysqlclient' ";
-		if ($finc ne "system") {
+		if (($finc ne "system") && ($finc ne "/usr/local/include")) {
 			$includes.= "--include '$finc' ";
 		}
 	}
@@ -148,7 +148,7 @@ if (!$clo{'without-postgresql'}) {
 		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_POSTGRESQL";
 		$dbs{'postgresql'} = 1;
 		$libraries.= "--linkwith '$flib,pq' ";
-		if ($finc ne "system") {
+		if (($finc ne "system") && ($finc ne "/usr/local/include")) {
 			$includes.= "--include '$finc' ";
 		}
 	}
