@@ -61,6 +61,7 @@ $VERSION = '0.0.1';
 my %clo;
 
 my %flags = (
+    'getid'	    => '',
     'debug'	    => '',
     'depend'	    => '',
     'pic'	    => '',
@@ -96,6 +97,8 @@ GetOptions(
     \%clo,
     'help|h!',
     'cxx=s',
+    'getid!',
+    'setid=s',
 
     'arflags|A!',
     'ar|a!',
@@ -129,6 +132,9 @@ GetOptions(
 sub usage {
     print "Usage: $0 [options]\n", <<EOT;
   --cxx string            The path to the compiler to use instead of \$CXX
+  --getid                 Get the current compiler ID
+  --setid id              Don't run the compiler, assume it has the given id
+
   --ar, a                 Get the name of the tool for making archives
   --arflags, A            Get the flags for the ar tool
   --arextra               Get any commands to run after ar (ie ranlib)
@@ -196,6 +202,7 @@ $clo{'linker'}		    and print "$flags{'linker'} ";
 $clo{'linkwith'}	    and print "$flags{'linkwith'} ";
 $clo{'mtcompile'}	    and print "$flags{'mtcompile'} ";
 $clo{'mtlink'}		    and print "$flags{'mtlink'} ";
+$clo{'getid'}		    and print "$flags{'getid'} ";
 			        print "\n";
 ################################################################################
 
@@ -208,19 +215,26 @@ sub stat_compiler {
 
     ################################################################################
     # gcc
-    $output = `$clo{'cxx'} -v 2>&1`;
+    if ($clo{'setid'} and $clo{'setid'} =~ /^gcc/) {
+	$output = $clo{'setid'};
+    } else {
+	$output = `$clo{'cxx'} -v 2>&1`;
+    }
+
     if ($output =~ /gcc/) {
 	my $linker = 'gnu'; # default for now
 
 	if ($^O =~ /solaris/i) {
-	    $output = `$clo{'cxx'} -Wl,-v 2>&1`;
+	    if ($clo{'setid'}) {
+		if ($clo{'setid'} eq 'gcc-sun') { $linker = 'sun'; }
+	    } else {
+		$output = `$clo{'cxx'} -Wl,-v 2>&1`;
 
-	    if ($output =~ /\[-h\s+name\]/ and $output =~ /\[-G\]/) {
-		$linker = 'sun';
+		if ($output =~ /\[-h\s+name\]/ and $output =~ /\[-G\]/) {
+		    $linker = 'sun';
+		}
 	    }
-	}
-
-	if ($^O =~ /darwin/i) {
+	} elsif ($^O =~ /darwin/i) {
 	    $linker = 'mach';
 	}
 
@@ -275,7 +289,7 @@ sub stat_compiler {
 	} elsif ($^O =~ /darwin/i) {
 	    $flags{'pic'} = '-shared';
 	    $flags{'shared.ext'} = '.dylib';
-	    $flags{'exec-ext'} = '.app';
+	    $flags{'exec-ext'} = '';
 	    $flags{'arextra'} = "ranlib";
 	} elsif ($^O =~ /cygwin/i) {
 	    $flags{'pic'} = '-shared';
@@ -284,12 +298,18 @@ sub stat_compiler {
 	    $flags{'pic'} = '-fpic -shared';
 	}
 
+	$flags{'getid'} = "gcc-$linker";
 	return;
     }
 
     ################################################################################
     # sun forte
-    $output = `$clo{'cxx'} -verbose=version 2>&1`;
+    if ($clo{'setid'} && $clo{'setid'} =~ /^sun/) {
+	$output = 'Sun';
+    } else {
+	$output = `$clo{'cxx'} -verbose=version 2>&1`;
+    }
+
     if ($output =~ /Sun/) {
 
 	$flags{'debug'}		= "-g";
@@ -328,53 +348,7 @@ sub stat_compiler {
 	    $flags{'shared-mjr'} = "lib$clo{'mkshared-name'}.so.$clo{'major'}" if $clo{'mkshared-name'};
 	}
 
-	return;
-    }
-
-    ################################################################################
-    # microsoft visual studio
-    $output = `$clo{'cxx'} -HELP 2>&1`;
-    if ($output =~ /Microsoft/) {
-
-	## TODO ##
-	# - Build shared lib
-	# - MT flags
-	# - Get dependancy info for files
-	##
-	$flags{'debug'}		    = "-g";
-	$flags{'depend'}	    = ''; # FIXME
-	$flags{'pic'}		    = '';
-	$flags{'optimize'}	    = '-GB -O2 -w';
-	$flags{'ar'}		    = 'lib.exe -nologo';
-	$flags{'arflags'}	    = '';
-	$flags{'warn'}		    = '-W1';
-	$flags{'object-ext'}	    = '.obj';
-	$flags{'static-ext'}	    = '.lib';
-	$flags{'shared-ext'}	    = '.dll';
-	$flags{'static-pre'}	    = '';
-	$flags{'shared-pre'}	    = '';
-	$flags{'general'}	    = '-GX -nologo';
-	$flags{'exec-ext'}	    = '.exe';
-	$flags{'mkexec'}	    = "-OUT:$clo{'mkexec'}" if $clo{'mkexec'};
-	$flags{'mkstatic'}	    = "-OUT:$clo{'mkstatic'}" if $clo{'mkstatic'};
-
-	if ($clo{'cxx'} =~ /[\\\/]/) {
-	    ($flags{'linker'} = $clo{'cxx'}) =~ s/^([^\\\/]*[\\\/]?).*/${1}link.exe/;
-	} else {
-	    $flags{'linker'} = "link.exe";
-	}
-
-	$flags{'linker'} .= " -nologo";
-
-	foreach (@{$clo{'linkwith'}}) {
-	    my ($path, $lib) = split(/,/, $_, 2);
-	    if ($lib) {
-		$flags{'linkwith'} .= "-LIBPATH:\"$path\" $lib.lib ";
-	    } else {
-		$flags{'linkwith'} .= "\"$path.lib\" ";
-	    }
-	}
-
+	$flags{'getid'} = 'sun-sun';
 	return;
     }
 

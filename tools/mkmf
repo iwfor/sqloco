@@ -88,6 +88,7 @@ GetOptions(
     'help|h!',
 
     'cxxflags=s',
+    'setid=s',
     'developer!',
     'include=s@',
     'linkwith=s@',
@@ -113,6 +114,8 @@ sub usage {
     print "Usage: $0 <options> <source files>\n", <<EOT;
   --help, -h             This message
   --cxxflags path        Give path to the cxxflags script
+  --setid id             Use the given compiler id instead of checking
+
   --developer            Add helpful stuff for a developer
   --include path         Add include path to CXXFLAGS
   --install spec         Add an install target using spec
@@ -155,6 +158,12 @@ $ENV{'CXX'}	    ||= 'c++';
 $ENV{'CXXFLAGS'}    ||= '';
 $ENV{'LD'}	    ||= `$^X $clo{'cxxflags'} --linker`; chomp $ENV{'LD'};
 $ENV{'LDFLAGS'}	    ||= '';
+
+if ($clo{'setid'}) {
+    addflags($clo{'cxxflags'}, " --setid $clo{'setid'}");
+} else {
+    addflags($clo{'cxxflags'}, "--setid " . `$^X $clo{'cxxflags'} --getid`);
+}
 
 chomp($object_extension = `$^X $clo{'cxxflags'} --object-extension`);
 chomp($exec_extension = `$^X $clo{'cxxflags'} --exec-extension`);
