@@ -121,10 +121,10 @@ $clo{'libdir'}	||= "$clo{'prefix'}/lib";
 my $libcnt = 0;
 
 # Verify CXX
-if (not -e $ENV{'CXX'}) {
-	print "The specified compiler, $ENV{'CXX'}, does not appear to exist.\n";
-	exit;
-}
+#if (not -e $ENV{'CXX'}) {
+#	print "The specified compiler, $ENV{'CXX'}, does not appear to exist.\n";
+#	exit;
+#}
 print "C++ Compiler... $ENV{'CXX'}\n";
 
 # Check for databases
@@ -308,6 +308,7 @@ sub find_mysql {
 		print "found.\n";
 	} else {
 		print "not found.\n";
+		return (undef, undef);
 	}
 	return ($finc, $flib);
 }
@@ -372,6 +373,7 @@ sub find_postgresql {
 		print "found.\n";
 	} else {
 		print "not found.\n";
+		return (undef, undef);
 	}
 	return ($finc, $flib);
 }

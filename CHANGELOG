@@ -1,5 +1,9 @@
 SQLoco - A C++ wrapper for SQL libraries
 
+Version 0.54
+------------
+- Fixed bug in configure.pl that caused both MySQL and Postgresql code to always build.
+
 Version 0.53
 ------------
 - Changed basic_string<>::clear() to basic_string::erase() for broader compiler

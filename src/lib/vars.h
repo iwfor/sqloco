@@ -43,7 +43,7 @@
 #ifndef ___vars_h
 #define ___vars_h
 
-#define VERSION	"0.53"
+#define VERSION	"0.54"
 
 // Anonymous namespace
 namespace {
