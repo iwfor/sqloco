@@ -40,7 +40,9 @@
  *
  */
 
-const static char* desc="$Version$";
+// This definition forces an object to exist, preventing problems on some
+// platforms. (e.g.  MacOS X)
+const static char* desc="$Id$";
 
 #ifdef SQLOCO_ENABLE_POSTGRESQL
 

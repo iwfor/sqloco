@@ -38,7 +38,7 @@
  *
  */
 
-const static char* desc="$Version$";
+const static char* desc="$Ver$";
 
 #ifdef SQLOCO_ENABLE_MYSQL
 
