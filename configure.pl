@@ -227,8 +227,8 @@ sub generate_tests_makefile {
 
 	print ".";
 	my $files;
-	$files+= "test_mysql.cxx" if ($dbs{'mysql'});
-	$files+= "test_postgresql.cxx" if ($dbs{'postgresql'});
+	$files.= " test_mysql.cxx" if ($dbs{'mysql'});
+	$files.= " test_postgresql.cxx" if ($dbs{'postgresql'});
 	system("$^X $mkmf $mkmf_flags $includes $libraries --linkwith '../testsupp,sqloco_testsupp' --quiet --many-exec $files");
 	chdir $cwd;
 }
