@@ -59,7 +59,7 @@ my $libname	= "sqloco";
 my $install_spec= "doc/install.spec";
 
 my $includes	= "--include '${cwd}/src/inc' ";
-my $libraries	= "--slinkwith '${cwd}/src/lib,$libname' ";
+my $libraries	= "--slinkwith '${cwd}/src/lib,$libname' --linkwith z ";
 
 my @extra_compile = (
 	"${cwd}/src/lib",
