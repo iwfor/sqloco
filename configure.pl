@@ -143,7 +143,7 @@ if (!$clo{'without-mysql'}) {
 	}
 }
 if (!$clo{'without-postgresql'}) {
-	$finc = find_postgresql();
+	($finc, $flib) = find_postgresql();
 	if ($finc) {
 		$libcnt++;
 		$ENV{'CXXFLAGS'}.= " -DSQLOCO_ENABLE_POSTGRESQL";

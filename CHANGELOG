@@ -9,6 +9,7 @@ Version 0.53
 - Dropped statement::getuid().
 - Corrections and improvements to configure.pl.
 - Added Postgresql support.
+- General cleanups and optimizations.
 
 Version 0.52
 ------------

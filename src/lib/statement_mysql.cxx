@@ -321,61 +321,42 @@ bool statement_mysql::fetch()
 		return true;
 	long fcount = mysql_num_fields(cursor),
 		bcount = bindings.size();
+	bool isnull;
 	for (long i=0; i < fcount && i < bcount; ++i)
 	{
 		mysql_field_s& f = bindings[i];
+		isnull = row[i] ? false : true;
+		nullfields[fieldnames[i]] = isnull;
 		if (f.str)
 		{
-			if (row[i])
-			{
+			if (!isnull)
 				*f.str = row[i];
-				nullfields[fieldnames[i]] = false;
-			}
 			else
-			{
 				f.str->erase();
-				nullfields[fieldnames[i]] = true;
-			}
 		}
 		else if (f.lnum)
 		{
-			if (row[i])
-			{
+			if (!isnull)
 				*f.lnum = std::atoi(row[i]);
-				nullfields[fieldnames[i]] = false;
-			}
 			else
-			{
 				*f.lnum = 0;
-				nullfields[fieldnames[i]] = true;
-			}
 		}
 		else if (f.dnum)
 		{
-			if (row[i])
-			{
+			if (!isnull)
 				*f.dnum = std::atof(row[i]);
-				nullfields[fieldnames[i]] = false;
-			}
 			else
-			{
 				*f.dnum = 0;
-				nullfields[fieldnames[i]] = true;
-			}
 		}
 		else if (f.buf)
 		{
-			if (row[i])
+			if (!isnull)
 			{
 				unsigned size = f.size < f.maxlength ? f.size : f.maxlength;
 				std::memcpy(f.buf, row[i], size);
-				nullfields[fieldnames[i]] = false;
 			}
 			else
-			{
 				std::memset(f.buf, 0, f.size);
-				nullfields[fieldnames[i]] = true;
-			}
 		}
 	}
 	return false;

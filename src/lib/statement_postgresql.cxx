@@ -335,63 +335,31 @@ bool statement_postgresql::fetch()
 
 	long bcount = bindings.size();
 	const char* result;
+	bool isnull;
 	for (long i=0; i < bcount; ++i)
 	{
 		postgresql_field_s& f = bindings[i];
 		result = PQgetvalue(cursor, currow, i);
+		isnull = PQgetisnull(cursor, currow, i);
+		nullfields[fieldnames[i]] = isnull;
 		if (f.str)
-		{
-			if (!PQgetisnull(cursor, currow, i))
-			{
-				*f.str = result;
-				nullfields[fieldnames[i]] = false;
-			}
-			else
-			{
-				f.str->erase();
-				nullfields[fieldnames[i]] = true;
-			}
-		}
+			*f.str = result;
 		else if (f.lnum)
-		{
-			if (!PQgetisnull(cursor, currow, i))
-			{
-				*f.lnum = std::atoi(result);
-				nullfields[fieldnames[i]] = false;
-			}
-			else
-			{
-				*f.lnum = 0;
-				nullfields[fieldnames[i]] = true;
-			}
-		}
+			*f.lnum = std::atoi(result);
 		else if (f.dnum)
-		{
-			if (!PQgetisnull(cursor, currow, i))
-			{
-				*f.dnum = std::atof(result);
-				nullfields[fieldnames[i]] = false;
-			}
-			else
-			{
-				*f.dnum = 0;
-				nullfields[fieldnames[i]] = true;
-			}
-		}
+			*f.dnum = std::atof(result);
 		else if (f.buf)
 		{
-			if (!PQgetisnull(cursor, currow, i))
+			if (!isnull)
 			{
 				unsigned size = PQgetlength(cursor, currow, i);
 				// Choose the smaller buffer size for copy
 				size = (f.size < size) ? f.size : size;
 				std::memcpy(f.buf, result, size);
-				nullfields[fieldnames[i]] = false;
 			}
 			else
 			{
 				std::memset(f.buf, 0, f.size);
-				nullfields[fieldnames[i]] = true;
 			}
 		}
 	}

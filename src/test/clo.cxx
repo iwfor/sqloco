@@ -16,9 +16,8 @@
 
 namespace {
     const char const_usage[] =
+"  --host string          Override default host of \"localhost\"\n"
 "  --port string          Override default port\n"
-"  -d, --database string  Override default database of \"test\"\n"
-"  -h, --host string      Override default host of \"localhost\"\n"
 "  -p, --password string  Specify the password (required)\n"
 "  -u, --username string  Specify the username (required)\n";
 
@@ -40,8 +39,6 @@ void clo::parser::parse (int argc, char *argv[], bool call_finalize) {
 void clo::parser::finalize (void) {
     if (state_ == state_value) {
 	switch (openum_) {
-	    case option_database:
-		throw clo::exception("missing value for 'database' option");
 	    case option_host:
 		throw clo::exception("missing value for 'host' option");
 	    case option_password:
@@ -113,16 +110,6 @@ void clo::parser::parse_element (const char *element, int position, opsource sou
 //#########################################################################
 void clo::parser::parse_short_option (char option, int position, opsource source) {
     switch (option) {
-    	case 'd':
-    	    openum_ = option_database;
-    	    state_ = state_value;
-    	    locations_.database = position;
-    	    return;
-    	case 'h':
-    	    openum_ = option_host;
-    	    state_ = state_value;
-    	    locations_.host = position;
-    	    return;
     	case 'p':
     	    openum_ = option_password;
     	    state_ = state_value;
@@ -146,12 +133,7 @@ void clo::parser::parse_short_option (char option, int position, opsource source
 void clo::parser::parse_long_option (const char *option, int position, opsource source) {
     option = expand_long_name(option);
 
-	    if (std::strcmp(option, "database") == 0) {
-		openum_ = option_database;
-		locations_.database = position;
-		state_ = state_value;
-		return;
-	    } else if (std::strcmp(option, "host") == 0) {
+	    if (std::strcmp(option, "host") == 0) {
 		openum_ = option_host;
 		locations_.host = position;
 		state_ = state_value;
@@ -181,11 +163,6 @@ void clo::parser::parse_long_option (const char *option, int position, opsource 
 //#########################################################################
 void clo::parser::parse_value (const char *value) {
     switch (openum_) {
-    	case option_database:
-    	    {
-    		options_.database = value;
-    	    }
-	    break;
     	case option_host:
     	    {
     		options_.host = value;
@@ -213,9 +190,6 @@ namespace {
     const char* expand_long_name (const std::string &name) {
 	std::string::size_type name_size = name.size();
 	std::vector<const char*> matches;
-
-        if (name_size <= 8 && name.compare(0, name_size, "database", name_size) == 0)
-        	matches.push_back("database");
 
         if (name_size <= 4 && name.compare(0, name_size, "host", name_size) == 0)
         	matches.push_back("host");

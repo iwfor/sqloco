@@ -47,6 +47,7 @@
 #include <string>
 
 bool test(clo::parser& parser);
+bool test1(sqloco::dbi& dbh);
 
 int main(int argc, char* argv[])
 {
@@ -94,8 +95,6 @@ bool test(clo::parser& parser)
 {
 	const clo::options& options = parser.get_options();
 	sqloco::dbi dbh(sqloco::db_mysql);
-	sqloco::statement* sth;
-	unsigned i;
 
 	// Open the database connection
 	if (dbh.open(options.username.c_str(), options.password.c_str()))
@@ -110,6 +109,18 @@ bool test(clo::parser& parser)
 		std::cout << "Failed to create database: " << dbh.errstr() << std::endl;
 		return true;
 	}
+
+	bool rval = test1(dbh);
+
+	// Clean up the database
+	dbh.execute("DROP DATABASE sqloco_test");
+	return rval;
+}
+
+bool test1(sqloco::dbi& dbh)
+{
+	sqloco::statement* sth;
+	unsigned i;
 
 	// Switch to the test database
 	if (dbh.execute("USE sqloco_test") < 0)
@@ -141,23 +152,35 @@ bool test(clo::parser& parser)
 	delete sth;
 
 	// Retrieve entries for first table
-	sth = dbh.prepare("SELECT * FROM phonebook ORDER BY name");
+	sth = dbh.prepare("SELECT * FROM phonebook ORDER BY phid");
 	if (sth->execute() < 0)
 	{
 		std::cout << "Failed query: " << dbh.errstr() << std::endl;
 		return true;
 	}
 	std::string name, number;
-	long phid;
+	long phid, row = 1;
 	sth->bind(phid);
 	sth->bind(name);
 	sth->bind(number);
 	while (!sth->fetch())
 	{
-		std::cout << "phid: " << phid << std::endl;
-		std::cout << "name: " << name << std::endl;
-		std::cout << "ph #: " << number << std::endl;
-		// TODO: check these entries against entries struct/array
+		if (phid != row)
+		{
+			std::cout << row << " phid " << phid << " != " << row << std::endl;
+			return true;
+		}
+		if (name != entries[row-1].name)
+		{
+			std::cout << row << " name " << name << " != " << entries[row-1].name << std::endl;
+			return true;
+		}
+		if (number != entries[row-1].number)
+		{
+			std::cout << row << " number " << number << " != " << entries[row-1].number << std::endl;
+			return true;
+		}
+		++row;
 	}
 
 	// Try the same query, but fetched into a hash
@@ -167,11 +190,25 @@ bool test(clo::parser& parser)
 		return true;
 	}
 	sqloco::Hash hash;
+	row = 1;
 	while (!sth->fetchhash(hash))
 	{
-		sqloco::Hash::iterator it(hash.begin()), end(hash.end());
-		for (; it!=end; ++it)
-			std::cout << it->first << ": " << it->second << std::endl;
+		if (std::atoi(hash["phid"].c_str()) != row)
+		{
+			std::cout << row << " phid " << hash["phid"] << " != " << row << std::endl;
+			return true;
+		}
+		if (hash["name"] != entries[row-1].name)
+		{
+			std::cout << row << " name " << hash["name"] << " != " << entries[row-1].name << std::endl;
+			return true;
+		}
+		if (hash["phonenumber"] != entries[row-1].number)
+		{
+			std::cout << row << " number " << hash["phonenumber"] << " != " << entries[row-1].number << std::endl;
+			return true;
+		}
+		++row;
 	}
 	delete sth;
 
@@ -188,19 +225,17 @@ bool test(clo::parser& parser)
 	sth = dbh.prepare("SELECT * FROM misctest\n");
 	sth->execute();
 	sth->bind(name);
-	while (!sth->fetch())
-	{
-		std::cout << "Word: ";
-		if (sth->isnull(0))
-			std::cout << "[NULL]";
-		else
-			std::cout << name;
-		std::cout << std::endl;
-	}
+	sth->fetch();
+	if (sth->isnull(0))
+		return true;
+	sth->fetch();
+	if (!sth->isnull(0))
+		return true;
+	sth->fetch();
+	if (sth->isnull(0))
+		return true;
 	delete sth;
 
-	// Clean up the database
-	dbh.execute("DROP DATABASE sqloco_test");
 	return false;
 }
 

@@ -35,11 +35,8 @@ namespace clo {
      * values to their default value.
     **/
     struct options {
-	options (void) :
-	    database("_test")
-	{ }
+	options (void) { }
 
-	std::string database;
 	std::string host;
 	std::string password;
 	std::string port;
@@ -52,7 +49,6 @@ namespace clo {
     **/
     struct option_locations {
 	typedef int size_type;
-	size_type database;
 	size_type host;
 	size_type password;
 	size_type port;
@@ -124,7 +120,6 @@ namespace clo {
 	enum options_enum {
 	    option_username,
 		option_password,
-		option_database,
 		option_host,
 		option_port
 	} openum_;
