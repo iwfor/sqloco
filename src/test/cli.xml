@@ -17,17 +17,26 @@
 		<option id="username" type="string">
 			<name>username</name>
 			<name>u</name>
-			<comment>Specify the username.</comment>
+			<comment>Specify the username (required)</comment>
 		</option>
 		<option id="password" type="string">
 			<name>password</name>
 			<name>p</name>
-			<comment>Specify the password.</comment>
+			<comment>Specify the password (required)</comment>
 		</option>
 		<option id="database" type="string" default="_test">
 			<name>database</name>
 			<name>d</name>
 			<comment>Override default database of "test"</comment>
+		</option>
+		<option id="host" type="string">
+			<name>host</name>
+			<name>h</name>
+			<comment>Override default host of "localhost"</comment>
+		</option>
+		<option id="port" type="string">
+			<name>port</name>
+			<comment>Override default port</comment>
 		</option>
 	</options>
 </cloxx>

@@ -40,7 +40,9 @@ namespace clo {
 	{ }
 
 	std::string database;
+	std::string host;
 	std::string password;
+	std::string port;
 	std::string username;
     }; // end options struct
  
@@ -51,7 +53,9 @@ namespace clo {
     struct option_locations {
 	typedef int size_type;
 	size_type database;
+	size_type host;
 	size_type password;
+	size_type port;
 	size_type username;
     }; // end option location struct
 
@@ -120,7 +124,9 @@ namespace clo {
 	enum options_enum {
 	    option_username,
 		option_password,
-		option_database
+		option_database,
+		option_host,
+		option_port
 	} openum_;
 
 	enum parser_state { state_option, state_value, state_consume } state_;

@@ -16,9 +16,11 @@
 
 namespace {
     const char const_usage[] =
+"  --port string          Override default port\n"
 "  -d, --database string  Override default database of \"test\"\n"
-"  -p, --password string  Specify the password.\n"
-"  -u, --username string  Specify the username.\n";
+"  -h, --host string      Override default host of \"localhost\"\n"
+"  -p, --password string  Specify the password (required)\n"
+"  -u, --username string  Specify the username (required)\n";
 
     const char* expand_long_name (const std::string &name);
 }
@@ -40,8 +42,12 @@ void clo::parser::finalize (void) {
 	switch (openum_) {
 	    case option_database:
 		throw clo::exception("missing value for 'database' option");
+	    case option_host:
+		throw clo::exception("missing value for 'host' option");
 	    case option_password:
 		throw clo::exception("missing value for 'password' option");
+	    case option_port:
+		throw clo::exception("missing value for 'port' option");
 	    case option_username:
 		throw clo::exception("missing value for 'username' option");
 	}
@@ -112,6 +118,11 @@ void clo::parser::parse_short_option (char option, int position, opsource source
     	    state_ = state_value;
     	    locations_.database = position;
     	    return;
+    	case 'h':
+    	    openum_ = option_host;
+    	    state_ = state_value;
+    	    locations_.host = position;
+    	    return;
     	case 'p':
     	    openum_ = option_password;
     	    state_ = state_value;
@@ -140,9 +151,19 @@ void clo::parser::parse_long_option (const char *option, int position, opsource 
 		locations_.database = position;
 		state_ = state_value;
 		return;
+	    } else if (std::strcmp(option, "host") == 0) {
+		openum_ = option_host;
+		locations_.host = position;
+		state_ = state_value;
+		return;
 	    } else if (std::strcmp(option, "password") == 0) {
 		openum_ = option_password;
 		locations_.password = position;
+		state_ = state_value;
+		return;
+	    } else if (std::strcmp(option, "port") == 0) {
+		openum_ = option_port;
+		locations_.port = position;
 		state_ = state_value;
 		return;
 	    } else if (std::strcmp(option, "username") == 0) {
@@ -165,9 +186,19 @@ void clo::parser::parse_value (const char *value) {
     		options_.database = value;
     	    }
 	    break;
+    	case option_host:
+    	    {
+    		options_.host = value;
+    	    }
+	    break;
     	case option_password:
     	    {
     		options_.password = value;
+    	    }
+	    break;
+    	case option_port:
+    	    {
+    		options_.port = value;
     	    }
 	    break;
     	case option_username:
@@ -186,8 +217,14 @@ namespace {
         if (name_size <= 8 && name.compare(0, name_size, "database", name_size) == 0)
         	matches.push_back("database");
 
+        if (name_size <= 4 && name.compare(0, name_size, "host", name_size) == 0)
+        	matches.push_back("host");
+
         if (name_size <= 8 && name.compare(0, name_size, "password", name_size) == 0)
         	matches.push_back("password");
+
+        if (name_size <= 4 && name.compare(0, name_size, "port", name_size) == 0)
+        	matches.push_back("port");
 
         if (name_size <= 8 && name.compare(0, name_size, "username", name_size) == 0)
         	matches.push_back("username");
