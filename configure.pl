@@ -49,8 +49,15 @@ use constant ID			=> '$Id$';
 
 #####
 # Global Variables
+use vars qw{$opt_help $opt_bundle $opt_developer $opt_prefix $opt_incdir
+	$opt_incdir $opt_libdir $opt_cxx $opt_disable_shared $opt_with_mysql
+	$opt_with_postgresql $opt_without_postgresql $opt_without_mysql};
+
+# The current directory
 my $cwd = cwd();
-my %clo;
+
+# Possible names for the compiler
+my @cxx_guess = qw(g++ c++ CC cl bcc32);
 
 my $mkmf	= "${cwd}/tools/mkmf";
 my $cxxflags	= "${cwd}/tools/cxxflags";
@@ -73,15 +80,7 @@ my %dbs;
 # Code Start
 $|++;
 
-if (not defined $ENV{'CXX'}) {
-	print STDERR "*** your CXX environment variable is not set. SQLoco needs this  ***\n";
-	print STDERR "*** this variable to find your C++ compiler. Please set it to    ***\n";
-	print STDERR "*** the path to your compiler and re-run configure.pl. Thanks.   ***\n";
-	exit 1;
-}
-
 GetOptions(
-	\%clo,
 	'help',
 	'developer',
 	'prefix=s',
@@ -92,7 +91,7 @@ GetOptions(
 	'without-mysql',
 	'without-postgresql'
 ) or usage();
-$clo{'help'} && usage();
+$opt_help && usage();
 
 sub usage {
 	print "Usage: $0 [options]\n", <<EOT;
@@ -114,23 +113,51 @@ EOT
 	exit;
 }
 
-$clo{'prefix'}	||= "/usr/local";
-$clo{'incdir'}	||= "$clo{'prefix'}/include";
-$clo{'libdir'}	||= "$clo{'prefix'}/lib";
+$opt_prefix	||= "/usr/local";
+$opt_incdir	||= "$opt_prefix/include";
+$opt_libdir	||= "$opt_prefix/lib";
 
 my $libcnt = 0;
 
-# Verify CXX
-#if (not -e $ENV{'CXX'}) {
-#	print "The specified compiler, $ENV{'CXX'}, does not appear to exist.\n";
-#	exit;
-#}
-print "C++ Compiler... $ENV{'CXX'}\n";
+print "Configuring SQLoco...\n";
+
+#####
+# Determine C++ compiler settings
+$opt_cxx ||= $ENV{'CXX'};
+if (not $opt_cxx) {
+	print "Checking C++ compiler... ";
+	my $path;
+	# search for a compiler
+	foreach (@cxx_guess) {
+		if ($path = search_path($_)) {
+			$opt_cxx = "$path/$_";
+			last;
+		}
+	}
+	if ($opt_cxx) {
+		print "$opt_cxx\n";
+	} else {
+		print <<EOT;
+Not found.
+
+You must specify your C++ compiler with the --cxx parameter or by setting the
+CXX environment variable.
+EOT
+		exit;
+	}
+} else {
+	if (not -e $opt_cxx) {
+		print "ERROR The C++ compiler does not appear to be valid: $opt_cxx\n";
+		exit;
+	}
+	print "Using C++ compiler... $opt_cxx\n";
+}
+$ENV{'CXX'} = $opt_cxx;		# This will be passed into mkmf
 
 # Check for databases
 my $finc;
 my $flib;
-if (!$clo{'without-mysql'}) {
+if (!$opt_without_mysql) {
 	($finc, $flib) = find_mysql();
 	if ($finc) {
 		$libcnt++;
@@ -147,7 +174,7 @@ if (!$clo{'without-mysql'}) {
 		}
 	}
 }
-if (!$clo{'without-postgresql'}) {
+if (!$opt_without_postgresql) {
 	($finc, $flib) = find_postgresql();
 	if ($finc) {
 		$libcnt++;
@@ -161,8 +188,9 @@ if (!$clo{'without-postgresql'}) {
 }
 
 my $mkmf_flags  = "--cxxflags '$cxxflags' --mt --quiet ";
-if ($clo{'developer'}) {
-	$mkmf_flags .= "--developer ";
+if ($opt_developer) {
+	print "Developer extensions... enabled\n";
+	$mkmf_flags.= "--developer ";
 }
 
 if (!$libcnt) {
@@ -175,18 +203,27 @@ generate_toplevel_makefile();
 generate_library_makefile();
 generate_tests_makefile();
 
-print "\n";
-print "+-------------------------------------------------------------+\n";
-print "| Okay, looks like you are ready to go.  To build, type:      |\n";
-print "|                                                             |\n";
-print "|       make                                                  |\n";
-print "|                                                             |\n";
-print "| To install, type:                                           |\n";
-print "|                                                             |\n";
-print "|       make install                                          |\n";
-print "|                                                             |\n";
-print "| While you wait, why not drop a note to isaac\@tazthecat.net? |\n";
-print "+-------------------------------------------------------------+\n";
+if (!$opt_bundle) {
+	print "\n";
+	print "Install Prefix:          $opt_prefix\n";
+	print "Includes Install Path:   $opt_incdir\n";
+	print "Libraries Install Path:  $opt_libdir\n";
+	print "\n";
+
+	print <<EOT;
+===============================================================================
+
+Configuration complete.  To built, type:
+
+    make
+
+To install, type:
+
+    make install
+
+===============================================================================
+EOT
+}
 
 
 sub generate_toplevel_makefile {
@@ -195,9 +232,9 @@ sub generate_toplevel_makefile {
 		exit 1;
 	}
 
-	print SPEC "libdir=$clo{'libdir'}\n";
+	print SPEC "libdir=$opt_libdir\n";
 	print SPEC "static-lib src/lib sqloco\n";
-	print SPEC "includedir=$clo{'incdir'}\n";
+	print SPEC "includedir=$opt_incdir\n";
 	print SPEC "include-dir src/inc/sqloco sqloco\n";
 	close SPEC;
 
@@ -245,10 +282,10 @@ sub generate_tests_makefile {
 sub find_mysql {
 	my $flib;
 	my $finc;
-	if ($clo{'with-mysql'}) {
+	if ($opt_with_mysql) {
 		print "Using user setting for MySQL\n";
-		$finc = "$clo{'with-mysql'}/include";
-		$flib = "$clo{'with-mysql'}/lib";
+		$finc = "$opt_with_mysql/include";
+		$flib = "$opt_with_mysql/lib";
 		return ($finc, $flib);
 	}
 	print "Checking for MySQL... ";
@@ -330,9 +367,9 @@ sub find_mysql {
 sub find_postgresql {
 	my $flib;
 	my $finc;
-	if ($clo{'with-postgresql'}) {
+	if ($opt_with_postgresql) {
 		print "Using user setting for PostgreSQL\n";
-		return "$clo{'with-postgresql'}/include";
+		return "$opt_with_postgresql/include";
 	}
 	print "Checking for PostgreSQL... ";
 	chomp ($flib = `pg_config --libdir`);
@@ -392,4 +429,38 @@ sub find_postgresql {
 		return (undef, undef);
 	}
 	return ($finc, $flib);
+}
+
+
+sub search_path {
+	my $prog = shift;
+	# Determine search paths
+	my $path = $ENV{'PATH'} || $ENV{'Path'} || $ENV{'path'};
+	my @paths = split /[;| |:]/, $path;
+
+	my $ext = $^O =~ /win/i ? '.exe' : '';
+
+	foreach (@paths) {
+		if (-e "$_/$prog$ext") {
+			return $_;
+		}
+	}
+	return undef;
+}
+
+sub run_command {
+	my $cmd = shift;
+	my $output;
+
+	# Note, INSTREAM is ignored.
+	my $pid = open3(\*INSTREAM, \*OUTSTREAM, \*OUTSTREAM, $cmd);
+
+	if (not $pid) {
+		return undef;
+	}
+	while (<OUTSTREAM>) {
+		$output.= $_;
+	}
+	waitpid($pid, 0);
+	return $output;
 }
