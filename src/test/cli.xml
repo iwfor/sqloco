@@ -1,0 +1,34 @@
+<cloxx> 
+	<!--    This is the command line generation file for use with clo++
+			You must have clo++ installed to generate the command line
+			parsing source code.
+	-->
+	<progname name="testx">
+		<description>
+			<para>  
+				SQLoco test program.
+			</para>
+		</description>
+	</progname>
+	<config>
+		<autohelp/>
+	</config>
+	<options>
+		<option id="username" type="string">
+			<name>username</name>
+			<name>u</name>
+			<comment>Specify the username.</comment>
+		</option>
+		<option id="password" type="string">
+			<name>password</name>
+			<name>p</name>
+			<comment>Specify the password.</comment>
+		</option>
+		<option id="database" type="string" default="_test">
+			<name>database</name>
+			<name>d</name>
+			<comment>Override default database of "test"</comment>
+		</option>
+	</options>
+</cloxx>
+

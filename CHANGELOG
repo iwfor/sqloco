@@ -1,0 +1,17 @@
+SQLoco - A C++ wrapper for SQL libraries
+
+Version 0.52
+------------
+- Added two new forms of execute for simplified programming.
+- Number parameters are no longer wrapped in quotes.
+
+Version 0.51
+------------
+- Modified configure to better detect MySQL directory, and source files
+  accordingly.
+- Began laying framework for Postgresql support.
+
+Version 0.50
+------------
+- First working version with MySQL support.
+

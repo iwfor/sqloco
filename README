@@ -1,0 +1,17 @@
+SQLoco - A C++ wrapper for SQL libraries
+Copyright (C) 2002 Isaac W. Foraker (isaac@tazthecat.net)
+All Rights Reserved
+
+See LICENSE file for license information.
+See INSTALL file for installation information.
+See AUTHORS file for a list of contributors.
+
+SQLoco is a SQL database interface for C++ applications.  SQLoco is modular, so
+several different SQL servers can be supported.
+
+This is currently only a pet project, and may never see full production.
+
+This version supports:
+
+MySQL
+
