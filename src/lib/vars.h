@@ -1,14 +1,10 @@
 /*
  * vars.h
- * 
- * $Id$
- *
- * tabstop=4
  *
  */
 
 /*
- * Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)
+ * Copyright (C) 2002-2003 Isaac W. Foraker (isaac at noscience dot net)
  * All Rights Reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +47,7 @@ namespace {
 	const char* sqloco_libname = "SQLoco version " VERSION;
 	const char* sqloco_author = "Isaac W. Foraker";
 	const char* sqloco_license =
-"Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)\n"
+"Copyright (C) 2002-2003 Isaac W. Foraker (isaac at noscience dot net)\n"
 "All Rights Reserved\n\n"
 
 "Redistribution and use in source and binary forms, with or without\n"

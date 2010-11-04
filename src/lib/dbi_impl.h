@@ -1,12 +1,10 @@
 /*
  * dbi_impl.h
  *
- * $Id$
- *
  */
 
 /*
- * Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)
+ * Copyright (C) 2002-2003 Isaac W. Foraker (isaac at noscience dot net)
  * All Rights Reserved
  *
  * Redistribution and use in source and binary forms, with or without

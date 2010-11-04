@@ -1,5 +1,5 @@
 SQLoco - A C++ wrapper for SQL libraries
-Copyright (C) 2002-2003 Isaac W. Foraker (isaac@tazthecat.net)
+Copyright (C) 2002-2003 Isaac W. Foraker (isaac at noscience dot net)
 All Rights Reserved
 
 See LICENSE file for license information.
@@ -17,7 +17,7 @@ MySQL
 Postgresql
 SQLite
 
-Please report problem or suggestions to isaac@tazthecat.net.
+Please report problem or suggestions to isaac at noscience dot net.
 
 Notes:
 This is Beta code.  Be aware that the API may change before the final release.
